@@ -19,23 +19,6 @@ public class DockerService
         RefreshTimer.Start();
     }
 
-    private async void RefreshTimerOnElapsed(object? sender, ElapsedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(async void () => await UpdateContainer(), DispatcherPriority.Background);
-    }
-
-    private async Task UpdateContainer()
-    {
-        RefreshTimer.Stop();
-        foreach (var instance in DockerInstances)
-        {
-            await instance.RefreshContainers();
-            await instance.RefreshImages();
-            await instance.RefreshVolumes();
-        }
-
-        RefreshTimer.Start();
-    }
 
     public static DockerService Instance
     {
@@ -67,6 +50,11 @@ public class DockerService
         DockerInstances.Clear();
     }
 
+    public async Task StopContainer(DockerContainer container)
+    {
+        await _instance.StopContainer(container);
+    }
+
     public void Connect(DockerInstance instance)
     {
         instance.Connect();
@@ -85,5 +73,23 @@ public class DockerService
     public async Task<ObservableCollection<DockerVolume>> GetVolumes(DockerInstance instanceDockerInstance)
     {
         return await instanceDockerInstance.ListVolumes();
+    }
+
+    private async void RefreshTimerOnElapsed(object? sender, ElapsedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(async void () => await UpdateInstanceData(), DispatcherPriority.Background);
+    }
+
+    private async Task UpdateInstanceData()
+    {
+        RefreshTimer.Stop();
+        foreach (var instance in DockerInstances)
+        {
+            await instance.RefreshContainers();
+            await instance.RefreshImages();
+            await instance.RefreshVolumes();
+        }
+
+        RefreshTimer.Start();
     }
 }

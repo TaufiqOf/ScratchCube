@@ -1,18 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
 
 public partial class DockerContainer : ViewModelBase
 {
-    [ObservableProperty]
-    private string _id = string.Empty;
+    public Action<DockerContainer>? OnStartStop { get; set; }
 
-    [ObservableProperty]
-    private IList<string> _names = new List<string>();
+    [ObservableProperty] private string _id = string.Empty;
+
+    [ObservableProperty] private IList<string> _names = new List<string>();
 
     public string DisplayName =>
         _names.Count > 0
@@ -20,20 +22,15 @@ public partial class DockerContainer : ViewModelBase
             : _id;
 
 
-    [ObservableProperty]
-    private string _image = string.Empty;
+    [ObservableProperty] private string _image = string.Empty;
 
-    [ObservableProperty]
-    private string _imageID = string.Empty;
+    [ObservableProperty] private string _imageID = string.Empty;
 
-    [ObservableProperty]
-    private string _command = string.Empty;  
+    [ObservableProperty] private string _command = string.Empty;
 
-    [ObservableProperty]
-    private DateTime _created;
+    [ObservableProperty] private DateTime _created;
 
-    [ObservableProperty]
-    private IList<DockerPort> _ports = new List<DockerPort>();
+    [ObservableProperty] private IList<DockerPort> _ports = new List<DockerPort>();
 
     public string DisplayPorts =>
         _ports.Count > 0
@@ -41,30 +38,40 @@ public partial class DockerContainer : ViewModelBase
             : string.Empty;
 
 
-    [ObservableProperty]
-    private long _sizeRw;
+    [ObservableProperty] private long _sizeRw;
 
-    [ObservableProperty]
-    private long _sizeRootFs;
+    [ObservableProperty] private long _sizeRootFs;
 
-    [ObservableProperty]
-    private IDictionary<string, string> _labels =
+    [ObservableProperty] private IDictionary<string, string> _labels =
         new Dictionary<string, string>();
 
-    [ObservableProperty]
-    private string _state = string.Empty;
+    [ObservableProperty] private string _state = string.Empty;
 
-    [ObservableProperty]
     private string _status = string.Empty;
 
-    [ObservableProperty]
-    private DockerSummaryNetworkSettings _networkSettings =
+    [ObservableProperty] private DockerSummaryNetworkSettings _networkSettings =
         new DockerSummaryNetworkSettings();
 
-    [ObservableProperty]
-    private IList<DockerMountPoint> _mounts =
+    [ObservableProperty] private IList<DockerMountPoint> _mounts =
         new List<DockerMountPoint>();
-    
+    public bool IsRunning => Status.Contains("Up", StringComparison.OrdinalIgnoreCase);
+    public string StartStopIcon => IsRunning ? "Pause" : "Play";
+    public string StartStopTooltip => IsRunning ? "Pause" : "Start";
+
+    public string Status
+    {
+        get => _status;
+        set
+        {
+            if (value == _status) return;
+            _status = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsRunning));
+            OnPropertyChanged(nameof(StartStopIcon));
+            OnPropertyChanged(nameof(StartStopTooltip));
+        }
+    }
+
     public void Update(DockerContainer fromContainer)
     {
         Id = fromContainer.Id;
@@ -83,4 +90,9 @@ public partial class DockerContainer : ViewModelBase
         Mounts = fromContainer.Mounts;
     }
 
+    [RelayCommand]
+    public void StartStop()
+    {
+        OnStartStop?.Invoke(this);
+    }
 }

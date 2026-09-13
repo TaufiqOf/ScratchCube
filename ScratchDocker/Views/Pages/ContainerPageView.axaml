@@ -510,13 +510,13 @@
                                             Spacing="2"
                                             VerticalAlignment="Center">
 
-                                    <!-- PLAY -->
-                                    <Button Classes="iconButton"
-                                            ToolTip.Tip="Start">
-                                        <fluent:FluentIcon Icon="Play"
-                                                           Width="17"
-                                                           Height="17" />
-                                    </Button>
+                                        <Button Classes="iconButton"
+                                                Command="{Binding StartStopCommand}"
+                                                ToolTip.Tip="{Binding StartStopTooltip}">
+                                                <fluent:FluentIcon Icon="{Binding StartStopIcon}"
+                                                                   Width="17"
+                                                                   Height="17" />
+                                        </Button>
 
                                     <!-- MORE -->
                                     <Button Classes="iconButton"

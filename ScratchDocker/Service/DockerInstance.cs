@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Docker.DotNet;
@@ -43,16 +44,27 @@ public partial class DockerInstance : ViewModelBase
         _client = new DockerClientConfiguration(new Uri(_uri)).CreateClient();
     }
 
+    public async Task StopDockerContainer(DockerContainer container)
+    {
+        await _client.Containers.StopContainerAsync(container.Id, new ContainerStopParameters());
+    }
+
+    public async Task StartDockerContainer(DockerContainer container)
+    {
+        await _client.Containers.StartContainerAsync(container.Id, new ContainerStartParameters());
+    }
+    
     public async Task<ObservableCollection<DockerContainer>> ListContainers()
     {
         try
         {
-            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters());
+            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters(){All = true});
             Containers.Clear();
             foreach (var container in containers)
             {
                 var dockerContainer = ConvertToDockerContainer(container);
                 Containers.Add(dockerContainer);
+                dockerContainer.OnStartStop += StartStop;
             }
 
             return Containers;
@@ -63,7 +75,20 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerContainer>();
         }
     }
-    
+
+    private async void StartStop(DockerContainer container)
+    {
+       var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
+       if(inspectResponse.State.Running)
+       {
+           await StopDockerContainer(container);
+       }
+       else
+       {
+           await StartDockerContainer(container);
+       }
+    }
+
     public async Task<ObservableCollection<DockerImage>> ListImages()
     {
         try
@@ -87,9 +112,6 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerImage>();
         }
     }
-
-
-
     public async Task<ObservableCollection<DockerVolume>> ListVolumes()
     {
         try
@@ -115,8 +137,6 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerVolume>();
         }
     }
-
-
 
     public async Task RefreshImages()
     {
@@ -147,7 +167,6 @@ public partial class DockerInstance : ViewModelBase
             Console.WriteLine(e);
         }
     }
-
     public async Task RefreshVolumes()
     {
         try
@@ -178,7 +197,9 @@ public partial class DockerInstance : ViewModelBase
     {
         try
         {
-            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters());
+            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters(){
+                All = true
+            });
 
             var newContainers = containers.Select(ConvertToDockerContainer).ToList();
             foreach (var dockerContainer in newContainers)
