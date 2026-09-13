@@ -10,6 +10,7 @@ public partial class VolumePageView : UserControl, IPageView
 
     public VolumePageView(IPageViewModel viewModel)
     {
+        DataContext = (VolumePageViewModel)viewModel;
         _viewModel = viewModel;
         InitializeComponent();
     }

@@ -25,7 +25,6 @@ public partial class DockerInstance : ViewModelBase
         set => SetProperty(ref _name, value);
     }
 
-
     public DockerInstance(string uri)
     {
         _uri = uri;
@@ -34,9 +33,7 @@ public partial class DockerInstance : ViewModelBase
 
     public void Connect()
     {
-        _client = new DockerClientConfiguration(
-                new Uri(_uri))
-            .CreateClient();
+        _client = new DockerClientConfiguration(new Uri(_uri)).CreateClient();
     }
 
     public async Task<ObservableCollection<DockerContainer>> ListContainers()
@@ -91,6 +88,40 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
+    public async Task<ObservableCollection<DockerVolume>> ListVolumes()
+    {
+        try
+        {
+            var volumes = await _client.Volumes.ListAsync();
+            var dockerVolumes = new ObservableCollection<DockerVolume>();
+
+            if (volumes.Volumes == null)
+            {
+                return dockerVolumes;
+            }
+
+            foreach (var volume in volumes.Volumes)
+            {
+                dockerVolumes.Add(new DockerVolume
+                {
+                    Name = volume.Name ?? string.Empty,
+                    Driver = volume.Driver ?? string.Empty,
+                    Mountpoint = volume.Mountpoint ?? string.Empty,
+                    Scope = volume.Scope ?? string.Empty,
+                    CreatedAt = volume.CreatedAt ?? string.Empty,
+                    RefCount = volume.UsageData?.RefCount ?? 0,
+                    Size = volume.UsageData?.Size ?? 0
+                });
+            }
+
+            return dockerVolumes;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ObservableCollection<DockerVolume>();
+        }
+    }
 
     public async Task RefreshContainers()
     {
@@ -99,16 +130,13 @@ public partial class DockerInstance : ViewModelBase
 
         try
         {
-            var containers = await _client.Containers.ListContainersAsync(
-                new ContainersListParameters());
+            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters());
 
-            var newContainers = containers
-                .Select(ConvertToDockerContainer)
-                .ToList();
+            var newContainers = containers.Select(ConvertToDockerContainer).ToList();
             foreach (var dockerContainer in newContainers)
             {
                 var existingContainer = Containers.FirstOrDefault(q => q.Id == dockerContainer.Id);
-                if(existingContainer == null)
+                if (existingContainer == null)
                 {
                     OnContainerAdded?.Invoke(dockerContainer);
                     Containers.Add(dockerContainer);
@@ -125,7 +153,6 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
-
     private static DockerContainer ConvertToDockerContainer(ContainerListResponse container)
     {
         var dockerContainer = new DockerContainer
@@ -136,13 +163,13 @@ public partial class DockerInstance : ViewModelBase
             ImageID = container.ImageID,
             Command = container.Command,
             Created = container.Created,
-
             SizeRw = container.SizeRw,
             SizeRootFs = container.SizeRootFs,
             Labels = container.Labels,
             State = container.State,
             Status = container.Status,
         };
+
         foreach (var dockerContainerPort in container.Ports)
         {
             dockerContainer.Ports.Add(new DockerPort
@@ -181,7 +208,17 @@ public partial class DockerInstance : ViewModelBase
                     NetworkID = network.Value.NetworkID
                 });
         });
+
         return dockerContainer;
     }
 
+    public async Task RefreshImages()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task RefreshVolumes()
+    {
+        throw new NotImplementedException();
+    }
 }

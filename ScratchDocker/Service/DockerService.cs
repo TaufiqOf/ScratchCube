@@ -30,7 +30,10 @@ public class DockerService
         foreach (var instance in DockerInstances)
         {
             await instance.RefreshContainers();
+            await instance.RefreshImages();
+            await instance.RefreshVolumes();
         }
+
         RefreshTimer.Start();
     }
 
@@ -77,5 +80,10 @@ public class DockerService
     public async Task<ObservableCollection<DockerImage>> GetImages(DockerInstance instanceDockerInstance)
     {
         return await instanceDockerInstance.ListImages();
+    }
+
+    public async Task<ObservableCollection<DockerVolume>> GetVolumes(DockerInstance instanceDockerInstance)
+    {
+        return await instanceDockerInstance.ListVolumes();
     }
 }
