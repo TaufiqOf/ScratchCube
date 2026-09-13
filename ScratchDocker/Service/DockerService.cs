@@ -49,12 +49,7 @@ public class DockerService
     {
         DockerInstances.Clear();
     }
-
-    public async Task StopContainer(DockerContainer container)
-    {
-        await _instance.StopContainer(container);
-    }
-
+    
     public void Connect(DockerInstance instance)
     {
         instance.Connect();

@@ -35,7 +35,13 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
             Containers.Add(container);
             ApplySearch();
         };
+        _selectedInstance.OnContainerRemoved = container =>
+        {
+            Containers.Remove(container);
+            ApplySearch();
+        };
         _dockerService.Connect(_selectedInstance);
+  
     }
 
     public async Task LoadData()
@@ -78,7 +84,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
     public async Task Refresh()
     {
         await _selectedInstance.RefreshContainers();
-        Containers = _selectedInstance.Containers;
+        Containers = _selectedInstance.DockerContainers;
         ApplySearch();
     }
 }

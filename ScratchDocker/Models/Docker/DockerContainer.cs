@@ -11,6 +11,7 @@ namespace ScratchDocker.Models.Docker;
 public partial class DockerContainer : ViewModelBase
 {
     public Action<DockerContainer>? OnStartStop { get; set; }
+    public Action<DockerContainer>? OnDelete { get; set; }
 
     [ObservableProperty] private string _id = string.Empty;
 
@@ -47,7 +48,6 @@ public partial class DockerContainer : ViewModelBase
 
     [ObservableProperty] private string _state = string.Empty;
 
-    private string _status = string.Empty;
 
     [ObservableProperty] private DockerSummaryNetworkSettings _networkSettings =
         new DockerSummaryNetworkSettings();
@@ -60,11 +60,11 @@ public partial class DockerContainer : ViewModelBase
 
     public string Status
     {
-        get => _status;
+        get => field;
         set
         {
-            if (value == _status) return;
-            _status = value;
+            if (value == field) return;
+            field = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsRunning));
             OnPropertyChanged(nameof(StartStopIcon));
@@ -95,4 +95,11 @@ public partial class DockerContainer : ViewModelBase
     {
         OnStartStop?.Invoke(this);
     }
+    
+    [RelayCommand]
+    public void Delete()
+    {
+        OnDelete?.Invoke(this);
+    }
+
 }

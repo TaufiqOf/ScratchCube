@@ -529,6 +529,7 @@
                                     <!-- DELETE -->
 
                                     <Button Classes="iconButton"
+                                            Command="{Binding DeleteCommand}"
                                             ToolTip.Tip="Delete">
                                         <fluent:FluentIcon Icon="Delete"
                                                            Width="17"
