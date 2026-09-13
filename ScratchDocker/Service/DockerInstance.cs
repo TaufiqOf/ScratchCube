@@ -17,7 +17,12 @@ public partial class DockerInstance : ViewModelBase
     private string _uri;
     private string _name;
     [ObservableProperty] public partial ObservableCollection<DockerContainer> Containers { get; private set; }
+    [ObservableProperty] public partial ObservableCollection<DockerVolume> DockerVolumes { get; private set; }
+    [ObservableProperty]  public partial ObservableCollection<DockerImage> DockerImages { get; private set; }
+
     public Action<DockerContainer> OnContainerAdded { get; set; }
+    public Action<DockerImage> OnImageAdded { get; set; }
+    public Action<DockerVolume> OnVolumeAdded { get; set; }
 
     public string Name
     {
@@ -29,6 +34,8 @@ public partial class DockerInstance : ViewModelBase
     {
         _uri = uri;
         Containers = new ObservableCollection<DockerContainer>();
+        DockerVolumes = new ObservableCollection<DockerVolume>();
+        DockerImages = new ObservableCollection<DockerImage>();
     }
 
     public void Connect()
@@ -56,7 +63,7 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerContainer>();
         }
     }
-
+    
     public async Task<ObservableCollection<DockerImage>> ListImages()
     {
         try
@@ -66,20 +73,13 @@ public partial class DockerInstance : ViewModelBase
                 All = true
             });
 
-            var dockerImages = new ObservableCollection<DockerImage>();
+            DockerImages = new ObservableCollection<DockerImage>();
             foreach (var image in images)
             {
-                dockerImages.Add(new DockerImage
-                {
-                    Id = image.ID,
-                    RepoTags = image.RepoTags ?? new List<string>(),
-                    Created = image.Created,
-                    Size = image.Size,
-                    Containers = image.Containers
-                });
+                DockerImages.Add(ConvertToDockerImage(image));
             }
 
-            return dockerImages;
+            return DockerImages;
         }
         catch (Exception e)
         {
@@ -88,33 +88,26 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
+
+
     public async Task<ObservableCollection<DockerVolume>> ListVolumes()
     {
         try
         {
             var volumes = await _client.Volumes.ListAsync();
-            var dockerVolumes = new ObservableCollection<DockerVolume>();
+            DockerVolumes = new ObservableCollection<DockerVolume>();
 
             if (volumes.Volumes == null)
             {
-                return dockerVolumes;
+                return DockerVolumes;
             }
 
             foreach (var volume in volumes.Volumes)
             {
-                dockerVolumes.Add(new DockerVolume
-                {
-                    Name = volume.Name ?? string.Empty,
-                    Driver = volume.Driver ?? string.Empty,
-                    Mountpoint = volume.Mountpoint ?? string.Empty,
-                    Scope = volume.Scope ?? string.Empty,
-                    CreatedAt = volume.CreatedAt ?? string.Empty,
-                    RefCount = volume.UsageData?.RefCount ?? 0,
-                    Size = volume.UsageData?.Size ?? 0
-                });
+                DockerVolumes.Add(ConvertToDockerVolume(volume));
             }
 
-            return dockerVolumes;
+            return DockerVolumes;
         }
         catch (Exception e)
         {
@@ -123,11 +116,66 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
+
+
+    public async Task RefreshImages()
+    {
+        try
+        {
+            var images = await _client.Images.ListImagesAsync(new ImagesListParameters
+            {
+                All = true
+            });
+
+            var dockerImages = images.Select(ConvertToDockerImage).ToList();
+            foreach (var dockerImage in dockerImages)
+            {
+                var existingImage = DockerImages.FirstOrDefault(q => q.Id == dockerImage.Id);
+                if (existingImage == null)
+                {
+                    OnImageAdded?.Invoke(dockerImage);
+                    DockerImages.Add(dockerImage);
+                }
+                else
+                {
+                    DockerImages[DockerImages.IndexOf(existingImage)].Update(dockerImage);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public async Task RefreshVolumes()
+    {
+        try
+        {
+            var volumes = await _client.Volumes.ListAsync();
+
+            var newVolumes = volumes.Volumes.Select(ConvertToDockerVolume).ToList();
+            foreach (var dockerVolume in newVolumes)
+            {
+                var existingVolume = DockerVolumes.FirstOrDefault(q => q.Mountpoint == dockerVolume.Mountpoint);
+                if (existingVolume == null)
+                {
+                    OnVolumeAdded?.Invoke(dockerVolume);
+                    DockerVolumes.Add(dockerVolume);
+                }
+                else
+                {
+                    DockerVolumes[DockerVolumes.IndexOf(existingVolume)].Update(dockerVolume);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
     public async Task RefreshContainers()
     {
-        if (_client == null)
-            return;
-
         try
         {
             var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters());
@@ -143,7 +191,7 @@ public partial class DockerInstance : ViewModelBase
                 }
                 else
                 {
-                    Containers[Containers.IndexOf(existingContainer)].UpdateToDockerContainer(dockerContainer);
+                    Containers[Containers.IndexOf(existingContainer)].Update(dockerContainer);
                 }
             }
         }
@@ -211,14 +259,28 @@ public partial class DockerInstance : ViewModelBase
 
         return dockerContainer;
     }
-
-    public async Task RefreshImages()
+    private static DockerImage ConvertToDockerImage(ImagesListResponse image)
     {
-        throw new NotImplementedException();
+        return new DockerImage
+        {
+            Id = image.ID,
+            RepoTags = image.RepoTags ?? new List<string>(),
+            Created = image.Created,
+            Size = image.Size,
+            Containers = image.Containers
+        };
     }
-
-    public async Task RefreshVolumes()
+    private static DockerVolume ConvertToDockerVolume(VolumeResponse volume)
     {
-        throw new NotImplementedException();
+        return new DockerVolume
+        {
+            Name = volume.Name ?? string.Empty,
+            Driver = volume.Driver ?? string.Empty,
+            Mountpoint = volume.Mountpoint ?? string.Empty,
+            Scope = volume.Scope ?? string.Empty,
+            CreatedAt = volume.CreatedAt ?? string.Empty,
+            RefCount = volume.UsageData?.RefCount ?? 0,
+            Size = volume.UsageData?.Size ?? 0
+        };
     }
 }

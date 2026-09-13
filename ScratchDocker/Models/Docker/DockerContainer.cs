@@ -65,7 +65,7 @@ public partial class DockerContainer : ViewModelBase
     private IList<DockerMountPoint> _mounts =
         new List<DockerMountPoint>();
     
-    public void UpdateToDockerContainer(DockerContainer fromContainer)
+    public void Update(DockerContainer fromContainer)
     {
         Id = fromContainer.Id;
         Names = fromContainer.Names;

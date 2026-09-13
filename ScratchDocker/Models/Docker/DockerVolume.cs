@@ -49,5 +49,16 @@ public partial class DockerVolume : ViewModelBase
             return $"{size.ToString("0.##", CultureInfo.InvariantCulture)} {units[unitIndex]}";
         }
     }
+
+    public void Update(DockerVolume dockerVolume)
+    {
+        Name = dockerVolume.Name;
+        Driver = dockerVolume.Driver;
+        Mountpoint = dockerVolume.Mountpoint;
+        Scope = dockerVolume.Scope;
+        CreatedAt = dockerVolume.CreatedAt;
+        RefCount = dockerVolume.RefCount;
+        Size = dockerVolume.Size;
+    }
 }
 

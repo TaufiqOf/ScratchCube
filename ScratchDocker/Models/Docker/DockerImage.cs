@@ -49,5 +49,14 @@ public partial class DockerImage : ViewModelBase
             return $"{size.ToString("0.##", CultureInfo.InvariantCulture)} {units[unitIndex]}";
         }
     }
+
+    public void Update(DockerImage dockerImage)
+    {
+        Id = dockerImage.Id;
+        RepoTags = dockerImage.RepoTags;
+        Created = dockerImage.Created;
+        Size = dockerImage.Size;
+        Containers = dockerImage.Containers;
+    }
 }
 
