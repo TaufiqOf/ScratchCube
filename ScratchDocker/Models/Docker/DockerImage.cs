@@ -2,26 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
 
 public partial class DockerImage : ViewModelBase
 {
-    [ObservableProperty]
-    private string _id = string.Empty;
+    public Action<DockerImage>? OnDelete { get; set; }
 
-    [ObservableProperty]
-    private IList<string> _repoTags = new List<string>();
+    [ObservableProperty] private string _id = string.Empty;
 
-    [ObservableProperty]
-    private DateTime _created;
+    [ObservableProperty] private IList<string> _repoTags = new List<string>();
 
-    [ObservableProperty]
-    private long _size;
+    [ObservableProperty] private DateTime _created;
 
-    [ObservableProperty]
-    private long _containers;
+    [ObservableProperty] private long _size;
+
+    [ObservableProperty] private long _containers;
 
     public string DisplayName => RepoTags.Count > 0 ? RepoTags[0] : "<none>:<none>";
 
@@ -58,5 +56,12 @@ public partial class DockerImage : ViewModelBase
         Size = dockerImage.Size;
         Containers = dockerImage.Containers;
     }
+
+    [RelayCommand]
+    public void Delete()
+    {
+        OnDelete?.Invoke(this);
+    }
+
 }
 

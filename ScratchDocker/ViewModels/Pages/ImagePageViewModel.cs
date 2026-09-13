@@ -27,6 +27,16 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
     public ImagePageViewModel()
     {
         _selectedInstance = _dockerService.DockerInstances[0];
+        _selectedInstance.OnImageAdded = image =>
+        {
+            Images.Add(image);
+            ApplySearch();
+        };
+        _selectedInstance.OnImageRemoved = image =>
+        {
+            Images.Remove(image);
+            ApplySearch();
+        };
         _dockerService.Connect(_selectedInstance);
     }
 

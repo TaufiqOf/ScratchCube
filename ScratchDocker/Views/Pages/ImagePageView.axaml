@@ -272,12 +272,7 @@
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="2"
                                             VerticalAlignment="Center">
-                                    <Button Classes="iconButton"
-                                            ToolTip.Tip="Run container">
-                                        <fluent:FluentIcon Icon="Play"
-                                                           Width="17"
-                                                           Height="17" />
-                                    </Button>
+              
 
                                     <Button Classes="iconButton"
                                             ToolTip.Tip="More actions">
@@ -287,6 +282,7 @@
                                     </Button>
 
                                     <Button Classes="iconButton"
+                                            Command="{Binding DeleteCommand}"
                                             ToolTip.Tip="Delete image">
                                         <fluent:FluentIcon Icon="Delete"
                                                            Width="17"

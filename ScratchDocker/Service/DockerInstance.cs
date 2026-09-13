@@ -19,7 +19,7 @@ public partial class DockerInstance : ViewModelBase
     private string _name;
     [ObservableProperty] public partial ObservableCollection<DockerContainer> DockerContainers { get; private set; }
     [ObservableProperty] public partial ObservableCollection<DockerVolume> DockerVolumes { get; private set; }
-    [ObservableProperty]  public partial ObservableCollection<DockerImage> DockerImages { get; private set; }
+    [ObservableProperty] public partial ObservableCollection<DockerImage> DockerImages { get; private set; }
 
     public Action<DockerContainer> OnContainerAdded { get; set; }
     public Action<DockerContainer> OnContainerRemoved { get; set; }
@@ -47,19 +47,20 @@ public partial class DockerInstance : ViewModelBase
         _client = new DockerClientConfiguration(new Uri(_uri)).CreateClient();
     }
 
-    
+
     public async Task<ObservableCollection<DockerContainer>> ListContainers()
     {
         try
         {
-            var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters(){All = true});
+            var containers =
+                await _client.Containers.ListContainersAsync(new ContainersListParameters() { All = true });
             DockerContainers.Clear();
             foreach (var container in containers)
             {
                 var dockerContainer = ConvertToDockerContainer(container);
                 DockerContainers.Add(dockerContainer);
-                dockerContainer.OnStartStop += StartStop;
-                dockerContainer.OnDelete += Delete;
+                dockerContainer.OnStartStop += StartStopContainer;
+                dockerContainer.OnDelete += DeleteContainer;
             }
 
             return DockerContainers;
@@ -70,15 +71,6 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerContainer>();
         }
     }
-
-    private async void Delete(DockerContainer obj)
-    {
-        await _client.Containers.RemoveContainerAsync(obj.Id, new ContainerRemoveParameters
-        {
-            Force = true
-        });
-    }
-
 
     public async Task<ObservableCollection<DockerImage>> ListImages()
     {
@@ -92,7 +84,9 @@ public partial class DockerInstance : ViewModelBase
             DockerImages = new ObservableCollection<DockerImage>();
             foreach (var image in images)
             {
-                DockerImages.Add(ConvertToDockerImage(image));
+                var dockerImage = ConvertToDockerImage(image);
+                dockerImage.OnDelete += DeleteImage;
+                DockerImages.Add(dockerImage);
             }
 
             return DockerImages;
@@ -103,6 +97,8 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerImage>();
         }
     }
+
+
     public async Task<ObservableCollection<DockerVolume>> ListVolumes()
     {
         try
@@ -129,89 +125,6 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
-    public async Task RefreshImages()
-    {
-        try
-        {
-            var images = await _client.Images.ListImagesAsync(new ImagesListParameters
-            {
-                All = true
-            });
-
-            var newImages = images.Select(ConvertToDockerImage).ToList();
-            foreach (var dockerImage in newImages)
-            {
-                var existingImage = DockerImages.FirstOrDefault(q => q.Id == dockerImage.Id);
-                if (existingImage == null)
-                {
-                    OnImageAdded?.Invoke(dockerImage);
-                    DockerImages.Add(dockerImage);
-                }
-                else
-                {
-                    DockerImages[DockerImages.IndexOf(existingImage)].Update(dockerImage);
-                }
-            }
-            // Remove images that no longer exist in Docker
-            var newVolumeIds = newImages
-                .Select(q => q.Id)
-                .ToHashSet();
-
-            var dockerImages = DockerImages
-                .Where(q => !newVolumeIds.Contains(q.Id))
-                .ToList();
-
-            foreach (var image in dockerImages)
-            {
-                DockerImages.Remove(image);
-                OnImageRemoved?.Invoke(image);
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
-    public async Task RefreshVolumes()
-    {
-        try
-        {
-            var volumes = await _client.Volumes.ListAsync();
-
-            var newVolumes = volumes.Volumes.Select(ConvertToDockerVolume).ToList();
-            foreach (var dockerVolume in newVolumes)
-            {
-                var existingVolume = DockerVolumes.FirstOrDefault(q => q.Mountpoint == dockerVolume.Mountpoint);
-                if (existingVolume == null)
-                {
-                    OnVolumeAdded?.Invoke(dockerVolume);
-                    DockerVolumes.Add(dockerVolume);
-                }
-                else
-                {
-                    DockerVolumes[DockerVolumes.IndexOf(existingVolume)].Update(dockerVolume);
-                }
-            }
-            // Remove volumes that no longer exist in Docker
-            var newVolumeIds = newVolumes
-                .Select(q => q.Name)
-                .ToHashSet();
-
-            var removedVolumes = DockerVolumes
-                .Where(q => !newVolumeIds.Contains(q.Name))
-                .ToList();
-
-            foreach (var volume in removedVolumes)
-            {
-                DockerVolumes.Remove(volume);
-                OnVolumeRemoved?.Invoke(volume);
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
     public async Task RefreshContainers()
     {
         try
@@ -236,8 +149,8 @@ public partial class DockerInstance : ViewModelBase
                 {
                     OnContainerAdded?.Invoke(dockerContainer);
                     DockerContainers.Add(dockerContainer);
-                    dockerContainer.OnStartStop += StartStop;
-                    dockerContainer.OnDelete += Delete;
+                    dockerContainer.OnStartStop += StartStopContainer;
+                    dockerContainer.OnDelete += DeleteContainer;
                 }
                 else
                 {
@@ -265,11 +178,101 @@ public partial class DockerInstance : ViewModelBase
             Console.WriteLine(e);
         }
     }
+
+    public async Task RefreshImages()
+    {
+        try
+        {
+            var images = await _client.Images.ListImagesAsync(new ImagesListParameters
+            {
+                All = true
+            });
+
+            var newImages = images.Select(ConvertToDockerImage).ToList();
+            foreach (var dockerImage in newImages)
+            {
+                var existingImage = DockerImages.FirstOrDefault(q => q.Id == dockerImage.Id);
+                if (existingImage == null)
+                {
+                    OnImageAdded?.Invoke(dockerImage);
+                    DockerImages.Add(dockerImage);
+                    dockerImage.OnDelete += DeleteImage;
+                }
+                else
+                {
+                    DockerImages[DockerImages.IndexOf(existingImage)].Update(dockerImage);
+                }
+            }
+
+            // Remove images that no longer exist in Docker
+            var newVolumeIds = newImages
+                .Select(q => q.Id)
+                .ToHashSet();
+
+            var dockerImages = DockerImages
+                .Where(q => !newVolumeIds.Contains(q.Id))
+                .ToList();
+
+            foreach (var image in dockerImages)
+            {
+                DockerImages.Remove(image);
+                OnImageRemoved?.Invoke(image);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public async Task RefreshVolumes()
+    {
+        try
+        {
+            var volumes = await _client.Volumes.ListAsync();
+
+            var newVolumes = volumes.Volumes.Select(ConvertToDockerVolume).ToList();
+            foreach (var dockerVolume in newVolumes)
+            {
+                var existingVolume = DockerVolumes.FirstOrDefault(q => q.Mountpoint == dockerVolume.Mountpoint);
+                if (existingVolume == null)
+                {
+                    OnVolumeAdded?.Invoke(dockerVolume);
+                    DockerVolumes.Add(dockerVolume);
+                    dockerVolume.OnDelete += DeleteVolume;
+                }
+                else
+                {
+                    DockerVolumes[DockerVolumes.IndexOf(existingVolume)].Update(dockerVolume);
+                }
+            }
+
+            // Remove volumes that no longer exist in Docker
+            var newVolumeIds = newVolumes
+                .Select(q => q.Name)
+                .ToHashSet();
+
+            var removedVolumes = DockerVolumes
+                .Where(q => !newVolumeIds.Contains(q.Name))
+                .ToList();
+
+            foreach (var volume in removedVolumes)
+            {
+                DockerVolumes.Remove(volume);
+                OnVolumeRemoved?.Invoke(volume);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
     
-    private async void StartStop(DockerContainer container)
+
+    private async void StartStopContainer(DockerContainer container)
     {
         var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
-        if(inspectResponse.State.Running)
+        if (inspectResponse.State.Running)
         {
             await StopDockerContainer(container);
         }
@@ -278,15 +281,40 @@ public partial class DockerInstance : ViewModelBase
             await StartDockerContainer(container);
         }
     }
+    
     private async Task StopDockerContainer(DockerContainer container)
     {
         await _client.Containers.StopContainerAsync(container.Id, new ContainerStopParameters());
     }
+
     private async Task StartDockerContainer(DockerContainer container)
     {
         await _client.Containers.StartContainerAsync(container.Id, new ContainerStartParameters());
     }
+
     
+    private async void DeleteContainer(DockerContainer obj)
+    {
+        await _client.Containers.RemoveContainerAsync(obj.Id, new ContainerRemoveParameters
+        {
+            Force = true
+        });
+    }
+    
+    private async void DeleteImage(DockerImage obj)
+    {
+        await _client.Images.DeleteImageAsync(obj.Id, new ImageDeleteParameters
+        {
+            Force = true,
+        });
+    }
+
+    private async void DeleteVolume(DockerVolume obj)
+    {
+        await _client.Volumes.RemoveAsync(obj.Name, true);
+    }
+    
+
     private static DockerContainer ConvertToDockerContainer(ContainerListResponse container)
     {
         var dockerContainer = new DockerContainer
@@ -345,6 +373,7 @@ public partial class DockerInstance : ViewModelBase
 
         return dockerContainer;
     }
+
     private static DockerImage ConvertToDockerImage(ImagesListResponse image)
     {
         return new DockerImage
@@ -356,6 +385,7 @@ public partial class DockerInstance : ViewModelBase
             Containers = image.Containers
         };
     }
+
     private static DockerVolume ConvertToDockerVolume(VolumeResponse volume)
     {
         return new DockerVolume
@@ -369,6 +399,4 @@ public partial class DockerInstance : ViewModelBase
             Size = volume.UsageData?.Size ?? 0
         };
     }
-   
-
 }

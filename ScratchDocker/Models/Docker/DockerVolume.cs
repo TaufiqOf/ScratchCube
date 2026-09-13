@@ -1,11 +1,15 @@
+using System;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
 
 public partial class DockerVolume : ViewModelBase
 {
+    public Action<DockerVolume>? OnDelete { get; set; }
+
     [ObservableProperty]
     private string _name = string.Empty;
 
@@ -59,6 +63,11 @@ public partial class DockerVolume : ViewModelBase
         CreatedAt = dockerVolume.CreatedAt;
         RefCount = dockerVolume.RefCount;
         Size = dockerVolume.Size;
+    }
+    [RelayCommand]
+    public void Delete()
+    {
+        OnDelete?.Invoke(this);
     }
 }
 

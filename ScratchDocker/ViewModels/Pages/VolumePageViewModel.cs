@@ -27,6 +27,16 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     public VolumePageViewModel()
     {
         _selectedInstance = _dockerService.DockerInstances[0];
+        _selectedInstance.OnVolumeAdded = volume =>
+        {
+            Volumes.Add(volume);
+            ApplySearch();
+        };
+        _selectedInstance.OnVolumeRemoved = volume =>
+        {
+            Volumes.Remove(volume);
+            ApplySearch();
+        };
         _dockerService.Connect(_selectedInstance);
     }
 
