@@ -1,13 +1,31 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using ScratchDocker.ViewModels;
+
 namespace ScratchDocker.Models.Docker;
 
-public class DockerMountPoint
+public partial class DockerMountPoint : ViewModelBase
 {
-    public string Type { get; set; }
-    public string Name { get; set; }
-    public string Source { get; set; }
-    public string Destination { get; set; }
-    public string Driver { get; set; }
-    public string Mode { get; set; }
-    public bool RW { get; set; }
-    public string Propagation { get; set; }
+    [ObservableProperty]
+    private string _type = string.Empty;
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _source = string.Empty;
+
+    [ObservableProperty]
+    private string _destination = string.Empty;
+
+    [ObservableProperty]
+    private string _driver = string.Empty;
+
+    [ObservableProperty]
+    private string _mode = string.Empty;
+
+    [ObservableProperty]
+    private bool _rw;
+
+    [ObservableProperty]
+    private string _propagation = string.Empty;
 }

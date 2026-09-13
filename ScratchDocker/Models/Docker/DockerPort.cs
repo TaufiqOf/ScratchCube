@@ -1,9 +1,32 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using ScratchDocker.ViewModels;
+
 namespace ScratchDocker.Models.Docker;
 
-public class DockerPort
+public partial class DockerPort : ViewModelBase
 {
-    public string IP { get; set; }
-    public ushort PrivatePort { get; set; }
-    public ushort PublicPort { get; set; }
-    public string Type { get; set; }
+    [ObservableProperty]
+    private string? _ip;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Display))]
+    private ushort _privatePort;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Display))]
+    private ushort _publicPort;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Display))]
+    private string? _type;
+
+    public string Display =>
+        PublicPort > 0
+            ? $"{PublicPort}:{PrivatePort}"
+            : $"{PrivatePort}/{Type}";
+
+    public override string ToString()
+    {
+        return Display;
+    }
 }

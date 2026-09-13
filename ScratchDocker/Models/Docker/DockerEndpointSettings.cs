@@ -1,21 +1,49 @@
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Docker.DotNet.Models;
+using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
 
-public class DockerEndpointSettings
+public partial class DockerEndpointSettings : ViewModelBase
 {
-    public EndpointIPAMConfig IPAMConfig { get; set; } = default!;
-    public IList<string> Links { get; set; } = new List<string>();
-    public IList<string> Aliases { get; set; } = new List<string>();
-    public string NetworkID { get; set; } = string.Empty;
-    public string EndpointID { get; set; } = string.Empty;
-    public string Gateway { get; set; } = string.Empty;
-    public string IPAddress { get; set; } = string.Empty;
-    public long IPPrefixLen { get; set; } = 0;
-    public string IPv6Gateway { get; set; } = string.Empty;
-    public string GlobalIPv6Address { get; set; } = string.Empty;
-    public long GlobalIPv6PrefixLen { get; set; } = 0;
-    public string MacAddress { get; set; } = string.Empty;
-    public IDictionary<string, string> DriverOpts { get; set; } = new Dictionary<string, string>();
+    [ObservableProperty]
+    private EndpointIPAMConfig _ipamConfig = default!;
+
+    [ObservableProperty]
+    private IList<string> _links = new List<string>();
+
+    [ObservableProperty]
+    private IList<string> _aliases = new List<string>();
+
+    [ObservableProperty]
+    private string _networkID = string.Empty;
+
+    [ObservableProperty]
+    private string _endpointID = string.Empty;
+
+    [ObservableProperty]
+    private string _gateway = string.Empty;
+
+    [ObservableProperty]
+    private string _ipAddress = string.Empty;
+
+    [ObservableProperty]
+    private long _ipPrefixLen;
+
+    [ObservableProperty]
+    private string _iPv6Gateway = string.Empty;
+
+    [ObservableProperty]
+    private string _globalIPv6Address = string.Empty;
+
+    [ObservableProperty]
+    private long _globalIPv6PrefixLen;
+
+    [ObservableProperty]
+    private string _macAddress = string.Empty;
+
+    [ObservableProperty]
+    private IDictionary<string, string> _driverOpts =
+        new Dictionary<string, string>();
 }

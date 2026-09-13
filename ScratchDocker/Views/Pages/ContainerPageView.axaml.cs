@@ -4,12 +4,13 @@ using ScratchDocker.ViewModels.Pages;
 
 namespace ScratchDocker.Views.Pages;
 
-public partial class MainPageView : UserControl, IPageView
+public partial class ContainerPageView : UserControl, IPageView
 {
     private readonly IPageViewModel _viewModel;
 
-    public MainPageView(IPageViewModel viewModel)
+    public ContainerPageView(IPageViewModel viewModel)
     {
+        DataContext = (ContainerPageViewModel)viewModel;
         _viewModel = viewModel;
         InitializeComponent();
     }

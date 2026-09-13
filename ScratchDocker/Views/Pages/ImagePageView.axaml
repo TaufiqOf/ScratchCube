@@ -1,0 +1,328 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScratchDocker.ViewModels.Pages"
+             xmlns:docker="using:ScratchDocker.Models.Docker"
+             xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             x:Class="ScratchDocker.Views.Pages.ImagePageView"
+             x:DataType="vm:ImagePageViewModel">
+
+    <UserControl.Styles>
+
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="RowBackground" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="RowHeight" Value="58" />
+            <Setter Property="CanUserResizeColumns" Value="True" />
+            <Setter Property="CanUserReorderColumns" Value="True" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="SelectionMode" Value="Single" />
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style Selector="DataGridRow">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style Selector="DataGridRow:pointerover">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        </Style>
+
+        <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <Style Selector="DataGridCell">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="DataGridCell:selected">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style Selector="DataGridCell:focus">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style Selector="Button.iconButton">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
+          Margin="28,24,28,0">
+
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto">
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Images"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+
+                <TextBlock Text="Browse and manage local Docker images."
+                           FontSize="13"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Padding="16,9"
+                    VerticalAlignment="Center">
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <fluent:FluentIcon Icon="ArrowDownload"
+                                       Width="16"
+                                       Height="16" />
+                    <TextBlock Text="Pull"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+            </Button>
+
+        </Grid>
+
+        <Grid Grid.Row="1"
+              Margin="0,24,0,16"
+              ColumnDefinitions="*,Auto">
+
+            <Border Height="40"
+                    MaxWidth="600"
+                    HorizontalAlignment="Left"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="6">
+
+                <Grid ColumnDefinitions="Auto,*">
+                    <fluent:FluentIcon Grid.Column="0"
+                                       Icon="Search"
+                                       Width="17"
+                                       Height="17"
+                                       Margin="12,0,8,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+
+                    <TextBox Grid.Column="1"
+                             Text="{Binding SearchText}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Watermark="Search images..."
+                             VerticalContentAlignment="Center" />
+                </Grid>
+
+            </Border>
+
+            <Button Grid.Column="1"
+                    Width="40"
+                    Height="40"
+                    Margin="6,0,0,0"
+                    Padding="0"
+                    Command="{Binding RefreshCommand}">
+                <fluent:FluentIcon Icon="ArrowClockwise"
+                                   Width="17"
+                                   Height="17" />
+            </Button>
+        </Grid>
+
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                ClipToBounds="True">
+
+            <DataGrid ItemsSource="{Binding FilteredImages}"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch"
+                      SelectionMode="Single"
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True"
+                      CanUserReorderColumns="True"
+                      IsReadOnly="True">
+
+                <DataGrid.Styles>
+                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+
+                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+
+                    <Style Selector="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0" />
+                    </Style>
+
+                    <Style Selector="DataGridRow:selected">
+                        <Setter Property="Background"
+                                Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
+                    </Style>
+                </DataGrid.Styles>
+
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
+
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="docker:DockerImage">
+                                <CheckBox HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="NAME"
+                                            Width="320">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="docker:DockerImage">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="10"
+                                            VerticalAlignment="Center">
+
+                                    <fluent:FluentIcon Icon="Layer"
+                                                       Width="14"
+                                                       Height="14"
+                                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               FontSize="14"
+                                               FontWeight="Medium"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="IMAGE ID"
+                                        Binding="{Binding ShortId}"
+                                        Width="180" />
+
+                    <DataGridTextColumn Header="SIZE"
+                                        Binding="{Binding DisplaySize}"
+                                        Width="140" />
+
+                    <DataGridTextColumn Header="IN USE"
+                                        Binding="{Binding Containers, StringFormat='{}{0} containers'}"
+                                        Width="170" />
+
+                    <DataGridTemplateColumn Header="CREATED"
+                                            Width="170">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="docker:DockerImage">
+                                <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:g}'}"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                           VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="ACTIONS"
+                                            Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="docker:DockerImage">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="2"
+                                            VerticalAlignment="Center">
+                                    <Button Classes="iconButton"
+                                            ToolTip.Tip="Run container">
+                                        <fluent:FluentIcon Icon="Play"
+                                                           Width="17"
+                                                           Height="17" />
+                                    </Button>
+
+                                    <Button Classes="iconButton"
+                                            ToolTip.Tip="More actions">
+                                        <fluent:FluentIcon Icon="MoreVertical"
+                                                           Width="17"
+                                                           Height="17" />
+                                    </Button>
+
+                                    <Button Classes="iconButton"
+                                            ToolTip.Tip="Delete image">
+                                        <fluent:FluentIcon Icon="Delete"
+                                                           Width="17"
+                                                           Height="17" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Border Grid.Row="3"
+                Padding="0,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <Ellipse Width="8"
+                             Height="8"
+                             Fill="{DynamicResource SystemControlSuccessBrush}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="Engine running"
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding Images.Count, StringFormat='{}{0} images'}"
+                           FontSize="12"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </Grid>
+        </Border>
+
+    </Grid>
+</UserControl>
+

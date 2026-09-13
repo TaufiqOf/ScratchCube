@@ -29,7 +29,7 @@
         <DependentUpon>MainWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\Pages\MainPageView.axaml.cs">
+      <Compile Update="Views\Pages\ContainerPageView.axaml.cs">
         <DependentUpon>MainPageView.axaml</DependentUpon>
       </Compile>
       <Compile Update="Views\Control\ManuControl.axaml.cs">
@@ -38,8 +38,12 @@
       <Compile Update="Views\Controls\ManuControlView.axaml.cs">
         <DependentUpon>MenuControlView.axaml</DependentUpon>
       </Compile>
-      <Compile Update="Views\Pages\SettingPageView.axaml.cs">
+      <Compile Update="Views\Pages\ImagePageView.axaml.cs">
         <DependentUpon>SettingPageView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Pages\VolumePageView.axaml.cs">
+        <DependentUpon>VolumePageView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
     </ItemGroup>

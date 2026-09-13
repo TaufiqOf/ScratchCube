@@ -6,9 +6,9 @@
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="ScratchDocker.Views.Pages.MainPageView">
+             x:Class="ScratchDocker.Views.Pages.VolumePageView">
     <Grid >
-        <TextBlock Text="Main Page" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24"/>
+        <TextBlock Text="Volume Page" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24"/>
     </Grid>
 
 </UserControl>
