@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace ScratchDocker.Views.Controls;
 
-public partial class DockerContainerInspectControlView : UserControl
+public partial class ModelViewerControlView : UserControl
 {
-    public DockerContainerInspectControlView()
+    public ModelViewerControlView()
     {
         InitializeComponent();
     }

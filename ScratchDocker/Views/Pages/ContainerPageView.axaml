@@ -226,7 +226,7 @@
     </UserControl.Styles>
 
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
           Margin="28,24,28,0">
 
 
@@ -341,224 +341,232 @@
                                    Height="17" />
             </Button>
         </Grid>
+        <Grid Grid.Row="2" RowDefinitions="*,Auto,300">
+            <!-- ====================================================== -->
+            <!-- CONTAINER TABLE                                        -->
+            <!-- ====================================================== -->
+            <Border Grid.Row="0"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    ClipToBounds="True">
 
-        <!-- ====================================================== -->
-        <!-- CONTAINER TABLE                                        -->
-        <!-- ====================================================== -->
-        <Border Grid.Row="2"
-                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-                BorderThickness="1"
-                CornerRadius="6"
-                ClipToBounds="True">
+                <DataGrid ItemsSource="{Binding FilteredContainers}"
+                          SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
+                          SelectionMode="Single"
+                          AutoGenerateColumns="False"
+                          CanUserResizeColumns="True"
+                          CanUserReorderColumns="True"
+                          IsReadOnly="True">
 
-            <DataGrid ItemsSource="{Binding FilteredContainers}"
-                      SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
-                      VerticalAlignment="Stretch"
-                      HorizontalAlignment="Stretch"
-                      SelectionMode="Single"
-                      AutoGenerateColumns="False"
-                      CanUserResizeColumns="True"
-                      CanUserReorderColumns="True"
-                      IsReadOnly="True">
+                    <DataGrid.Styles>
 
-                <DataGrid.Styles>
+                        <!-- Remove the white focus rectangle around the current cell -->
+                        <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
 
-                    <!-- Remove the white focus rectangle around the current cell -->
-                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
-                        <Setter Property="IsVisible" Value="False" />
-                    </Style>
+                        <!-- Remove the current-cell rectangle -->
+                        <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
 
-                    <!-- Remove the current-cell rectangle -->
-                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
-                        <Setter Property="IsVisible" Value="False" />
-                    </Style>
+                        <!-- Also remove cell border -->
+                        <Style Selector="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0" />
+                        </Style>
 
-                    <!-- Also remove cell border -->
-                    <Style Selector="DataGridCell">
-                        <Setter Property="BorderThickness" Value="0" />
-                    </Style>
+                        <!-- Keep the row selection background -->
+                        <Style Selector="DataGridRow:selected">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
+                        </Style>
 
-                    <!-- Keep the row selection background -->
-                    <Style Selector="DataGridRow:selected">
-                        <Setter Property="Background"
-                                Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
-                    </Style>
+                    </DataGrid.Styles>
 
-                </DataGrid.Styles>
-
-                <DataGrid.Columns>
-
-
-                    <!-- ================================================== -->
-                    <!-- CHECKBOX                                            -->
-                    <!-- ================================================== -->
-
-                    <DataGridTemplateColumn Width="48">
-                        <DataGridTemplateColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-
-                            </DataTemplate>
-                        </DataGridTemplateColumn.HeaderTemplate>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="docker:DockerContainer">
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-
-                            </DataTemplate>
-
-                        </DataGridTemplateColumn.CellTemplate>
-
-                    </DataGridTemplateColumn>
+                    <DataGrid.Columns>
 
 
-                    <!-- ================================================== -->
-                    <!-- NAME                                                -->
-                    <!-- ================================================== -->
+                        <!-- ================================================== -->
+                        <!-- CHECKBOX                                            -->
+                        <!-- ================================================== -->
 
-                    <DataGridTemplateColumn Header="NAME"
-                                            Width="230">
+                        <DataGridTemplateColumn Width="48">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <CheckBox HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
 
-                        <DataGridTemplateColumn.CellTemplate>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="docker:DockerContainer">
+                                    <CheckBox HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
 
-                            <DataTemplate x:DataType="docker:DockerContainer">
+                                </DataTemplate>
 
-                                <StackPanel Orientation="Horizontal"
-                                            Spacing="10"
-                                            VerticalAlignment="Center">
+                            </DataGridTemplateColumn.CellTemplate>
 
-                                    <!-- Status indicator -->
-
-                                    <Ellipse Width="10"
-                                             Height="10"
-                                             Fill="{DynamicResource SystemControlSuccessBrush}"
-                                             VerticalAlignment="Center" />
+                        </DataGridTemplateColumn>
 
 
-                                    <StackPanel Spacing="2"
+                        <!-- ================================================== -->
+                        <!-- NAME                                                -->
+                        <!-- ================================================== -->
+
+                        <DataGridTemplateColumn Header="NAME"
+                                                Width="230">
+
+                            <DataGridTemplateColumn.CellTemplate>
+
+                                <DataTemplate x:DataType="docker:DockerContainer">
+
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="10"
                                                 VerticalAlignment="Center">
 
-                                        <TextBlock Text="{Binding DisplayName}"
-                                                   FontSize="14"
-                                                   FontWeight="Medium"
-                                                   TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding Status}"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                        <!-- Status indicator -->
+
+                                        <Ellipse Width="10"
+                                                 Height="10"
+                                                 Fill="{DynamicResource SystemControlSuccessBrush}"
+                                                 VerticalAlignment="Center" />
+
+
+                                        <StackPanel Spacing="2"
+                                                    VerticalAlignment="Center">
+
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontSize="14"
+                                                       FontWeight="Medium"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Status}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <!-- ================================================== -->
-                    <!-- CONTAINER ID                                        -->
-                    <!-- ================================================== -->
-                    <DataGridTextColumn Header="CONTAINER ID"
-                                        Binding="{Binding Id}"
-                                        Width="*" />
+                        <!-- ================================================== -->
+                        <!-- CONTAINER ID                                        -->
+                        <!-- ================================================== -->
+                        <DataGridTextColumn Header="CONTAINER ID"
+                                            Binding="{Binding Id}"
+                                            Width="*" />
 
-                    <!-- ================================================== -->
-                    <!-- IMAGE                                               -->
-                    <!-- ================================================== -->
-                    <DataGridTemplateColumn Header="IMAGE"
-                                            Width="280">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="docker:DockerContainer">
-                                <Button Classes="imageButton"
-                                        HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding Image}"
+                        <!-- ================================================== -->
+                        <!-- IMAGE                                               -->
+                        <!-- ================================================== -->
+                        <DataGridTemplateColumn Header="IMAGE"
+                                                Width="280">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="docker:DockerContainer">
+                                    <Button Classes="imageButton"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Image}"
+                                                   FontSize="13"
+                                                   Foreground="{DynamicResource SystemControlAccentBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- ================================================== -->
+                        <!-- PORTS                                               -->
+                        <!-- ================================================== -->
+                        <DataGridTextColumn Header="PORT(S)"
+                                            Binding="{Binding DisplayPorts}"
+                                            Width="200" />
+
+
+                        <!-- ================================================== -->
+                        <!-- LAST STARTED                                        -->
+                        <!-- ================================================== -->
+                        <DataGridTemplateColumn Header="LAST STARTED"
+                                                Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="docker:DockerContainer">
+                                    <TextBlock Text="{Binding Created, StringFormat='{}{0:g}'}"
                                                FontSize="13"
-                                               Foreground="{DynamicResource SystemControlAccentBrush}"
-                                               TextTrimming="CharacterEllipsis" />
-                                </Button>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                               VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <!-- ================================================== -->
-                    <!-- PORTS                                               -->
-                    <!-- ================================================== -->
-                    <DataGridTextColumn Header="PORT(S)"
-                                        Binding="{Binding DisplayPorts}"
-                                        Width="200" />
+                        <!-- ================================================== -->
+                        <!-- ACTIONS                                             -->
+                        <!-- ================================================== -->
+                        <DataGridTemplateColumn Header="ACTIONS"
+                                                Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="docker:DockerContainer">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="2"
+                                                VerticalAlignment="Center">
 
+                                        <Button Classes="iconButton"
+                                                Command="{Binding StartStopCommand}"
+                                                ToolTip.Tip="{Binding StartStopTooltip}">
+                                            <fluent:FluentIcon Icon="{Binding StartStopIcon}"
+                                                               Width="17"
+                                                               Height="17" />
+                                        </Button>
 
-                    <!-- ================================================== -->
-                    <!-- LAST STARTED                                        -->
-                    <!-- ================================================== -->
-                    <DataGridTemplateColumn Header="LAST STARTED"
-                                            Width="160">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="docker:DockerContainer">
-                                <TextBlock Text="{Binding Created, StringFormat='{}{0:g}'}"
-                                           FontSize="13"
-                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                           VerticalAlignment="Center" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                        <!-- MORE -->
+                                        <Button Classes="iconButton"
+                                                ToolTip.Tip="More actions">
+                                            <fluent:FluentIcon Icon="MoreVertical"
+                                                               Width="17"
+                                                               Height="17" />
+                                        </Button>
 
-                    <!-- ================================================== -->
-                    <!-- ACTIONS                                             -->
-                    <!-- ================================================== -->
-                    <DataGridTemplateColumn Header="ACTIONS"
-                                            Width="130">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="docker:DockerContainer">
-                                <StackPanel Orientation="Horizontal"
-                                            Spacing="2"
-                                            VerticalAlignment="Center">
+                                        <!-- DELETE -->
 
-                                    <Button Classes="iconButton"
-                                            Command="{Binding StartStopCommand}"
-                                            ToolTip.Tip="{Binding StartStopTooltip}">
-                                        <fluent:FluentIcon Icon="{Binding StartStopIcon}"
-                                                           Width="17"
-                                                           Height="17" />
-                                    </Button>
-
-                                    <!-- MORE -->
-                                    <Button Classes="iconButton"
-                                            ToolTip.Tip="More actions">
-                                        <fluent:FluentIcon Icon="MoreVertical"
-                                                           Width="17"
-                                                           Height="17" />
-                                    </Button>
-
-                                    <!-- DELETE -->
-
-                                    <Button Classes="iconButton"
-                                            Command="{Binding DeleteCommand}"
-                                            ToolTip.Tip="Delete">
-                                        <fluent:FluentIcon Icon="Delete"
-                                                           Width="17"
-                                                           Height="17" />
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-
-        <!-- ====================================================== -->
-        <!-- Details                                                -->
-        <!-- ====================================================== -->
-        <TabControl Grid.Row="3" Height="300">
-            <TabItem Header="Inspect">
-                <controls:DockerContainerInspectControlView
-                    DataContext="{Binding DockerContainerInspectControlViewModel}" />
-            </TabItem>
-        </TabControl>
+                                        <Button Classes="iconButton"
+                                                Command="{Binding DeleteCommand}"
+                                                ToolTip.Tip="Delete">
+                                            <fluent:FluentIcon Icon="Delete"
+                                                               Width="17"
+                                                               Height="17" />
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+            <GridSplitter Grid.Row="1"
+                          Height="5"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
+                          ResizeDirection="Rows"
+                          ResizeBehavior="PreviousAndNext"
+                          Background="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                          Cursor="SizeNorthSouth" />
+            <!-- ====================================================== -->
+            <!-- Details                                                -->
+            <!-- ====================================================== -->
+            <TabControl Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TabItem Header="Inspect" FontSize="14">
+                    <controls:ModelViewerControlView
+                        DataContext="{Binding DockerContainerInspectControlViewModel}" />
+                </TabItem>
+            </TabControl>
+        </Grid>
         <!-- ====================================================== -->
         <!-- FOOTER                                                 -->
         <!-- ====================================================== -->
 
-        <Border Grid.Row="4"
+        <Border Grid.Row="3"
                 Padding="0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
 

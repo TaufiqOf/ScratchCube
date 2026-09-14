@@ -9,14 +9,14 @@ using ScratchDocker.Models.Docker;
 
 namespace ScratchDocker.ViewModels.Controls;
 
-public class DockerContainerInspectControlViewModel : ViewModelBase
+public class ModelViewerControlViewModel<T> : ViewModelBase
 {
-    public DockerContainerInspectControlViewModel(DockerContainerInspect? inspect = null)
+    public ModelViewerControlViewModel(T? inspect)
     {
         SetInspect(inspect);
     }
 
-    public DockerContainerInspect? Inspect
+    public T? Inspect
     {
         get;
         private set
@@ -31,9 +31,9 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
         }
     }
 
-    public ObservableCollection<DockerInspectPropertyItem> Properties { get; } = new();
+    public ObservableCollection<PropertyItem> Properties { get; } = new();
 
-    public void SetInspect(DockerContainerInspect? inspect)
+    public void SetInspect(T? inspect)
     {
         Inspect = inspect;
         Properties.Clear();
@@ -44,14 +44,14 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
         }
 
         var visited = new HashSet<object>(ReferenceComparer.Instance);
-        AppendValue(nameof(DockerContainerInspect), inspect, 0, visited);
+        AppendValue(nameof(T), inspect, 0, visited);
     }
 
     private void AppendValue(string path, object? value, int depth, HashSet<object> visited)
     {
         if (value == null)
         {
-            Properties.Add(new DockerInspectPropertyItem(path, "null", depth));
+            Properties.Add(new PropertyItem(path, "null", depth));
             return;
         }
 
@@ -59,13 +59,13 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
 
         if (IsSimple(type))
         {
-            Properties.Add(new DockerInspectPropertyItem(path, FormatSimple(value), depth));
+            Properties.Add(new PropertyItem(path, FormatSimple(value), depth));
             return;
         }
 
         if (value is IDictionary dictionary)
         {
-            Properties.Add(new DockerInspectPropertyItem(path, $"dict({dictionary.Count})", depth));
+            Properties.Add(new PropertyItem(path, $"dict({dictionary.Count})", depth));
 
             foreach (DictionaryEntry entry in dictionary)
             {
@@ -79,7 +79,7 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
         if (value is IEnumerable enumerable and not string)
         {
             var items = enumerable.Cast<object?>().ToList();
-            Properties.Add(new DockerInspectPropertyItem(path, $"list({items.Count})", depth));
+            Properties.Add(new PropertyItem(path, $"list({items.Count})", depth));
 
             for (var i = 0; i < items.Count; i++)
             {
@@ -91,11 +91,11 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
 
         if (!type.IsValueType && !visited.Add(value))
         {
-            Properties.Add(new DockerInspectPropertyItem(path, "<circular-reference>", depth));
+            Properties.Add(new PropertyItem(path, "<circular-reference>", depth));
             return;
         }
 
-        Properties.Add(new DockerInspectPropertyItem(path, $"object({type.Name})", depth));
+        Properties.Add(new PropertyItem(path, $"object({type.Name})", depth));
 
         var properties = type
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -115,7 +115,7 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
                 propertyValue = $"<error:{ex.GetType().Name}>";
             }
 
-            AppendValue($"{path}.{property.Name}", propertyValue, depth + 1, visited);
+            AppendValue($"{property.Name}", propertyValue, depth + 1, visited);
         }
 
         if (!type.IsValueType)
@@ -163,9 +163,9 @@ public class DockerContainerInspectControlViewModel : ViewModelBase
     }
 }
 
-public sealed class DockerInspectPropertyItem
+public sealed class PropertyItem
 {
-    public DockerInspectPropertyItem(string path, string value, int depth)
+    public PropertyItem(string path, string value, int depth)
     {
         Path = path;
         Value = value;

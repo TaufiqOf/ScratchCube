@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ScratchDocker.Views.Controls.ModelViewerControlView"
+             x:CompileBindings="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0"
+                   Margin="0,0,0,10"
+                   Text="Inspect details"
+                   FontWeight="SemiBold"
+                   FontSize="14" />
+
+        <Border Grid.Row="1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="8">
+            <DataGrid ItemsSource="{Binding Properties}"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch"
+                      SelectionMode="Single"
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True"
+                      CanUserReorderColumns="True"
+                      IsReadOnly="True"
+                      RowHeight="26">
+
+                <DataGrid.Styles>
+
+                    <Style Selector="DataGridRow">
+                        <Setter Property="Height" Value="26" />
+                        <Setter Property="MinHeight" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+
+                    <Style Selector="DataGridCell">
+                        <Setter Property="Height" Value="26" />
+                        <Setter Property="MinHeight" Value="0" />
+                        <Setter Property="Padding" Value="2,0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Height" Value="26" />
+                        <Setter Property="MinHeight" Value="0" />
+                        <Setter Property="Padding" Value="3,0" />
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+
+                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+
+                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+
+                    <Style Selector="DataGridRow:selected">
+                        <Setter Property="Background"
+                                Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
+                    </Style>
+                </DataGrid.Styles>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Property"
+                                        Binding="{Binding DisplayPath}" />
+                    <DataGridTextColumn Header="Value"
+                                        Binding="{Binding Value}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <!-- <ScrollViewer> -->
+            <!--     <ItemsControl ItemsSource="{Binding Properties}"> -->
+            <!--         <ItemsControl.ItemTemplate> -->
+            <!--             <DataTemplate x:DataType="vm:DockerInspectPropertyItem"> -->
+            <!--                 <Grid Margin="0,2" -->
+            <!--                       ColumnDefinitions="4*,6*"> -->
+            <!--                     <TextBlock Grid.Column="0" -->
+            <!--                                Text="{Binding DisplayPath}" -->
+            <!--                                TextTrimming="CharacterEllipsis" /> -->
+            <!--                     <TextBlock Grid.Column="1" -->
+            <!--                                Text="{Binding Value}" -->
+            <!--                                TextWrapping="Wrap" /> -->
+            <!--                 </Grid> -->
+            <!--             </DataTemplate> -->
+            <!--         </ItemsControl.ItemTemplate> -->
+            <!--     </ItemsControl> -->
+            <!-- </ScrollViewer> -->
+        </Border>
+    </Grid>
+</UserControl>

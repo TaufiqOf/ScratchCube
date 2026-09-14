@@ -15,16 +15,16 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
 {
     [ObservableProperty]
     private string _searchText = string.Empty;
-
     [ObservableProperty]
     public partial ObservableCollection<DockerContainer> Containers { get; private set; }
         = new();
-
     [ObservableProperty]
     public partial ObservableCollection<DockerContainer> FilteredContainers { get; private set; }
         = new();
+    [ObservableProperty]
+    private ModelViewerControlViewModel<DockerContainerInspect>? _dockerContainerInspectControlViewModel;
 
-    public DockerContainer SelectedContainer
+    public DockerContainer? SelectedContainer
     {
         get;
         set
@@ -36,17 +36,9 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
         }
     }
 
-    private async void OnContainerSelectionChanged()
-    {
-        var inspect = await _selectedInstance.InspectContainer(SelectedContainer);
-        DockerContainerInspectControlViewModel.SetInspect(inspect);
-    }
-
-    [ObservableProperty]
-    private DockerContainerInspectControlViewModel _dockerContainerInspectControlViewModel = new();
-
     private readonly DockerService _dockerService = DockerService.Instance;
     private DockerInstance? _selectedInstance;
+    
     public ContainerPageViewModel()
     {
         _selectedInstance = _dockerService.DockerInstances[0];
@@ -61,11 +53,15 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
             ApplySearch();
         };
         _dockerService.Connect(_selectedInstance);
-  
+        _dockerContainerInspectControlViewModel = new ModelViewerControlViewModel<DockerContainerInspect>(null);
     }
 
     public async Task LoadData()
     {
+        if(_selectedInstance == null)
+        {
+            return;
+        }
         Containers = await _dockerService.GetContainers(_selectedInstance);
 
         ApplySearch();
@@ -101,10 +97,26 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
     }
 
     [RelayCommand]
-    public async Task Refresh()
+    private async Task Refresh()
     {
+        if(_selectedInstance == null)
+        {
+            return;
+        }
         await _selectedInstance.RefreshContainers();
         Containers = _selectedInstance.DockerContainers;
         ApplySearch();
+    }
+    
+    
+    private async void OnContainerSelectionChanged()
+    {
+        if(_selectedInstance == null)
+        {
+            DockerContainerInspectControlViewModel?.SetInspect(null);
+            return;
+        }
+        var inspect = await _selectedInstance.InspectContainer(SelectedContainer);
+        DockerContainerInspectControlViewModel?.SetInspect(inspect);
     }
 }
