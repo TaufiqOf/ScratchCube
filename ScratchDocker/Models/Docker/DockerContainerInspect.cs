@@ -11,7 +11,7 @@ public partial class DockerContainerInspect : ViewModelBase
     [ObservableProperty] private DateTime _created;
     [ObservableProperty] private string _path;
     [ObservableProperty] private IList<string> _args;
-    [ObservableProperty] private DockerContainerState _state;
+    [ObservableProperty] private DockerContianerState _state;
     [ObservableProperty] private string _image;
     [ObservableProperty] private string _resolvConfPath;
     [ObservableProperty] private string _hostnamePath;

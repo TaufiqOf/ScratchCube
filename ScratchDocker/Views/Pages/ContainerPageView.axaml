@@ -4,226 +4,11 @@
              xmlns:docker="using:ScratchDocker.Models.Docker"
              xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
              xmlns:controls="clr-namespace:ScratchDocker.Views.Controls"
+             xmlns:dataGrid="clr-namespace:ScratchDocker.Views.Controls.DataGrid"
              x:Class="ScratchDocker.Views.Pages.ContainerPageView"
              x:DataType="vm:ContainerPageViewModel">
 
-    <UserControl.Styles>
-
-        <!-- ====================================================== -->
-        <!-- DATAGRID                                               -->
-        <!-- ====================================================== -->
-
-        <Style Selector="DataGrid">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="RowBackground"
-                    Value="Transparent" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-
-            <Setter Property="GridLinesVisibility"
-                    Value="Horizontal" />
-
-            <Setter Property="HorizontalGridLinesBrush"
-                    Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
-
-            <Setter Property="VerticalGridLinesBrush"
-                    Value="Transparent" />
-
-            <Setter Property="HeadersVisibility"
-                    Value="Column" />
-
-            <Setter Property="RowHeight"
-                    Value="58" />
-
-            <Setter Property="CanUserResizeColumns"
-                    Value="True" />
-
-            <Setter Property="CanUserReorderColumns"
-                    Value="True" />
-
-            <Setter Property="IsReadOnly"
-                    Value="True" />
-
-            <Setter Property="SelectionMode"
-                    Value="Single" />
-        </Style>
-
-
-        <!-- ====================================================== -->
-        <!-- HEADER                                                  -->
-        <!-- ====================================================== -->
-
-        <Style Selector="DataGridColumnHeader">
-            <Setter Property="Height"
-                    Value="44" />
-
-            <Setter Property="Padding"
-                    Value="12,0" />
-
-            <Setter Property="FontSize"
-                    Value="11" />
-
-            <Setter Property="FontWeight"
-                    Value="SemiBold" />
-
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Left" />
-
-            <Setter Property="VerticalContentAlignment"
-                    Value="Center" />
-
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="Foreground"
-                    Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-        </Style>
-
-
-        <!-- ====================================================== -->
-        <!-- ROW                                                     -->
-        <!-- ====================================================== -->
-
-        <Style Selector="DataGridRow">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="Foreground"
-                    Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-        </Style>
-
-
-        <!-- Row hover -->
-        <Style Selector="DataGridRow:pointerover">
-            <Setter Property="Background"
-                    Value="Transparent" />
-        </Style>
-
-
-        <!-- Row selected -->
-        <Style Selector="DataGridRow:selected">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="Foreground"
-                    Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-        </Style>
-
-
-        <!-- Row selected template background -->
-        <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
-            <Setter Property="IsVisible"
-                    Value="False" />
-        </Style>
-
-
-        <!-- Row hover template background -->
-        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
-            <Setter Property="IsVisible"
-                    Value="False" />
-        </Style>
-
-
-        <!-- ====================================================== -->
-        <!-- CELLS                                                   -->
-        <!-- ====================================================== -->
-
-        <Style Selector="DataGridCell">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="Padding"
-                    Value="12,0" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-
-            <Setter Property="BorderBrush"
-                    Value="Transparent" />
-
-            <Setter Property="Foreground"
-                    Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-
-            <Setter Property="VerticalContentAlignment"
-                    Value="Center" />
-        </Style>
-
-
-        <!-- Selected cell -->
-        <Style Selector="DataGridCell:selected">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="Foreground"
-                    Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-
-            <Setter Property="BorderBrush"
-                    Value="Transparent" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-        </Style>
-
-
-        <!-- Focused cell -->
-        <Style Selector="DataGridCell:focus">
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="BorderBrush"
-                    Value="Transparent" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-        </Style>
-
-
-        <!-- ====================================================== -->
-        <!-- BUTTONS                                                 -->
-        <!-- ====================================================== -->
-
-        <Style Selector="Button.iconButton">
-            <Setter Property="Width"
-                    Value="36" />
-
-            <Setter Property="Height"
-                    Value="36" />
-
-            <Setter Property="Padding"
-                    Value="0" />
-
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-        </Style>
-
-
-        <Style Selector="Button.imageButton">
-            <Setter Property="Padding"
-                    Value="0" />
-
-            <Setter Property="Background"
-                    Value="Transparent" />
-
-            <Setter Property="BorderThickness"
-                    Value="0" />
-
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Left" />
-        </Style>
-
-    </UserControl.Styles>
+  
 
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
@@ -236,9 +21,7 @@
 
         <Grid Grid.Row="0"
               ColumnDefinitions="*,Auto">
-
             <StackPanel Spacing="4">
-
                 <TextBlock Text="Containers"
                            FontSize="26"
                            FontWeight="SemiBold"
@@ -247,30 +30,22 @@
                 <TextBlock Text="View all your running containers and applications."
                            FontSize="13"
                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-
             </StackPanel>
-
 
             <Button Grid.Column="1"
                     Padding="16,9"
                     VerticalAlignment="Center">
-
                 <StackPanel Orientation="Horizontal"
                             Spacing="8">
-
                     <fluent:FluentIcon Icon="Add"
                                        Width="16"
                                        Height="16" />
-
                     <TextBlock Text="Run"
                                VerticalAlignment="Center" />
 
                 </StackPanel>
-
             </Button>
-
         </Grid>
-
 
         <!-- ====================================================== -->
         <!-- TOOLBAR                                                -->
@@ -306,11 +81,8 @@
                              Background="Transparent"
                              Watermark="Search containers..."
                              VerticalContentAlignment="Center" />
-
                 </Grid>
-
             </Border>
-
 
             <!-- FILTER -->
 
@@ -326,9 +98,7 @@
 
             </Button>
 
-
             <!-- REFRESH -->
-
             <Button Grid.Column="2"
                     Width="40"
                     Height="40"
@@ -350,199 +120,7 @@
                     BorderThickness="1"
                     CornerRadius="6"
                     ClipToBounds="True">
-
-                <DataGrid ItemsSource="{Binding FilteredContainers}"
-                          SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
-                          VerticalAlignment="Stretch"
-                          HorizontalAlignment="Stretch"
-                          SelectionMode="Single"
-                          AutoGenerateColumns="False"
-                          CanUserResizeColumns="True"
-                          CanUserReorderColumns="True"
-                          IsReadOnly="True">
-
-                    <DataGrid.Styles>
-
-                        <!-- Remove the white focus rectangle around the current cell -->
-                        <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
-                            <Setter Property="IsVisible" Value="False" />
-                        </Style>
-
-                        <!-- Remove the current-cell rectangle -->
-                        <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
-                            <Setter Property="IsVisible" Value="False" />
-                        </Style>
-
-                        <!-- Also remove cell border -->
-                        <Style Selector="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0" />
-                        </Style>
-
-                        <!-- Keep the row selection background -->
-                        <Style Selector="DataGridRow:selected">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
-                        </Style>
-
-                    </DataGrid.Styles>
-
-                    <DataGrid.Columns>
-
-
-                        <!-- ================================================== -->
-                        <!-- CHECKBOX                                            -->
-                        <!-- ================================================== -->
-
-                        <DataGridTemplateColumn Width="48">
-                            <DataGridTemplateColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <CheckBox HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-
-                                </DataTemplate>
-                            </DataGridTemplateColumn.HeaderTemplate>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="docker:DockerContainer">
-                                    <CheckBox HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-
-                                </DataTemplate>
-
-                            </DataGridTemplateColumn.CellTemplate>
-
-                        </DataGridTemplateColumn>
-
-
-                        <!-- ================================================== -->
-                        <!-- NAME                                                -->
-                        <!-- ================================================== -->
-
-                        <DataGridTemplateColumn Header="NAME"
-                                                Width="230">
-
-                            <DataGridTemplateColumn.CellTemplate>
-
-                                <DataTemplate x:DataType="docker:DockerContainer">
-
-                                    <StackPanel Orientation="Horizontal"
-                                                Spacing="10"
-                                                VerticalAlignment="Center">
-
-                                        <!-- Status indicator -->
-
-                                        <Ellipse Width="10"
-                                                 Height="10"
-                                                 Fill="{DynamicResource SystemControlSuccessBrush}"
-                                                 VerticalAlignment="Center" />
-
-
-                                        <StackPanel Spacing="2"
-                                                    VerticalAlignment="Center">
-
-                                            <TextBlock Text="{Binding DisplayName}"
-                                                       FontSize="14"
-                                                       FontWeight="Medium"
-                                                       TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Status}"
-                                                       FontSize="11"
-                                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                                       TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <!-- ================================================== -->
-                        <!-- CONTAINER ID                                        -->
-                        <!-- ================================================== -->
-                        <DataGridTextColumn Header="CONTAINER ID"
-                                            Binding="{Binding Id}"
-                                            Width="*" />
-
-                        <!-- ================================================== -->
-                        <!-- IMAGE                                               -->
-                        <!-- ================================================== -->
-                        <DataGridTemplateColumn Header="IMAGE"
-                                                Width="280">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="docker:DockerContainer">
-                                    <Button Classes="imageButton"
-                                            HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Image}"
-                                                   FontSize="13"
-                                                   Foreground="{DynamicResource SystemControlAccentBrush}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <!-- ================================================== -->
-                        <!-- PORTS                                               -->
-                        <!-- ================================================== -->
-                        <DataGridTextColumn Header="PORT(S)"
-                                            Binding="{Binding DisplayPorts}"
-                                            Width="200" />
-
-
-                        <!-- ================================================== -->
-                        <!-- LAST STARTED                                        -->
-                        <!-- ================================================== -->
-                        <DataGridTemplateColumn Header="LAST STARTED"
-                                                Width="160">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="docker:DockerContainer">
-                                    <TextBlock Text="{Binding Created, StringFormat='{}{0:g}'}"
-                                               FontSize="13"
-                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                               VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <!-- ================================================== -->
-                        <!-- ACTIONS                                             -->
-                        <!-- ================================================== -->
-                        <DataGridTemplateColumn Header="ACTIONS"
-                                                Width="130">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="docker:DockerContainer">
-                                    <StackPanel Orientation="Horizontal"
-                                                Spacing="2"
-                                                VerticalAlignment="Center">
-
-                                        <Button Classes="iconButton"
-                                                Command="{Binding StartStopCommand}"
-                                                ToolTip.Tip="{Binding StartStopTooltip}">
-                                            <fluent:FluentIcon Icon="{Binding StartStopIcon}"
-                                                               Width="17"
-                                                               Height="17" />
-                                        </Button>
-
-                                        <!-- MORE -->
-                                        <Button Classes="iconButton"
-                                                ToolTip.Tip="More actions">
-                                            <fluent:FluentIcon Icon="MoreVertical"
-                                                               Width="17"
-                                                               Height="17" />
-                                        </Button>
-
-                                        <!-- DELETE -->
-
-                                        <Button Classes="iconButton"
-                                                Command="{Binding DeleteCommand}"
-                                                ToolTip.Tip="Delete">
-                                            <fluent:FluentIcon Icon="Delete"
-                                                               Width="17"
-                                                               Height="17" />
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    <dataGrid:ContainerPageDataGridControlView  DataContext="{Binding}" />
             </Border>
             <GridSplitter Grid.Row="1"
                           Height="5"
@@ -555,10 +133,24 @@
             <!-- ====================================================== -->
             <!-- Details                                                -->
             <!-- ====================================================== -->
-            <TabControl Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TabControl Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
                 <TabItem Header="Inspect" FontSize="14">
                     <controls:ModelViewerControlView
-                        DataContext="{Binding DockerContainerInspectControlViewModel}" />
+                        DataContext="{Binding InspectModelViewerControlViewModel}" />
+                </TabItem>
+                <TabItem Header="Stats" FontSize="14">
+                    <controls:ModelViewerControlView
+                        DataContext="{Binding StatsModelViewerControlViewModel}" />
+                </TabItem>
+                <TabItem Header="Logs" FontSize="14">
+                    <TextBox x:Name="LogTextBox"
+                             Text="{Binding SelectedContainerLogs}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalContentAlignment="Top"
+                             FontFamily="Consolas"
+                             FontSize="12" />
                 </TabItem>
             </TabControl>
         </Grid>

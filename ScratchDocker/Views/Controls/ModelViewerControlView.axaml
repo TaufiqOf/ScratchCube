@@ -4,12 +4,6 @@
              x:CompileBindings="False">
 
     <Grid RowDefinitions="Auto,*">
-        <TextBlock Grid.Row="0"
-                   Margin="0,0,0,10"
-                   Text="Inspect details"
-                   FontWeight="SemiBold"
-                   FontSize="14" />
-
         <Border Grid.Row="1"
                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="1"

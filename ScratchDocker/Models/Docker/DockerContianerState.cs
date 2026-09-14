@@ -3,7 +3,7 @@ using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
 
-public partial class DockerContainerState : ViewModelBase
+public partial class DockerContianerState : ViewModelBase
 {
     [ObservableProperty] private string _status;
     [ObservableProperty] private bool _running;

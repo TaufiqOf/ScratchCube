@@ -16,8 +16,8 @@ public static class Mapper
             Path = source.Path,
             Args = source.Args,
             State = source.State == null
-                ? new DockerContainerState()
-                : new DockerContainerState
+                ? new DockerContianerState()
+                : new DockerContianerState
                 {
                     Status = source.State.Status,
                     Running = source.State.Running,
@@ -496,8 +496,8 @@ public static class Mapper
 
         return dockerContainer;
     }
-    
-    
+
+
     public static DockerImage ConvertToDockerImage(ImagesListResponse image)
     {
         return new DockerImage
@@ -522,5 +522,151 @@ public static class Mapper
             RefCount = volume.UsageData?.RefCount ?? 0,
             Size = volume.UsageData?.Size ?? 0
         };
+    }
+
+    public static DockerContainerStatsResponse ConvertContainerStatsResponse(
+        ContainerStatsResponse stats)
+    {
+        return new DockerContainerStatsResponse
+        {
+            Read = stats.Read,
+            PreRead = stats.PreRead,
+
+            Name = stats.Name,
+            Id = stats.ID,
+            NumProcs = stats.NumProcs,
+
+            PidsStats = new DockerPidsStats
+            {
+                Current = stats.PidsStats?.Current ?? 0,
+                Limit = stats.PidsStats?.Limit ?? 0
+            },
+
+            CpuStats = new DockerCpuStats
+            {
+                SystemUsage = stats.CPUStats?.SystemUsage ?? 0,
+                OnlineCPUs = stats.CPUStats?.OnlineCPUs ?? 0,
+
+                CpuUsage = new DockerCpuUsage
+                {
+                    TotalUsage = stats.CPUStats?.CPUUsage?.TotalUsage ?? 0,
+                    UsageInKernelmode = stats.CPUStats?.CPUUsage?.UsageInKernelmode ?? 0,
+                    UsageInUsermode = stats.CPUStats?.CPUUsage?.UsageInUsermode ?? 0,
+                    PercpuUsage = stats.CPUStats?.CPUUsage?.PercpuUsage
+                                  ?? new List<ulong>()
+                },
+
+                ThrottlingData = new DockerThrottlingData
+                {
+                    Periods = stats.CPUStats?.ThrottlingData?.Periods ?? 0,
+                    ThrottledPeriods = stats.CPUStats?.ThrottlingData?.ThrottledPeriods ?? 0,
+                    ThrottledTime = stats.CPUStats?.ThrottlingData?.ThrottledTime ?? 0
+                }
+            },
+
+            PreCpuStats = new DockerCpuStats
+            {
+                SystemUsage = stats.PreCPUStats?.SystemUsage ?? 0,
+                OnlineCPUs = stats.PreCPUStats?.OnlineCPUs ?? 0,
+
+                CpuUsage = new DockerCpuUsage
+                {
+                    TotalUsage = stats.PreCPUStats?.CPUUsage?.TotalUsage ?? 0,
+                    UsageInKernelmode = stats.PreCPUStats?.CPUUsage?.UsageInKernelmode ?? 0,
+                    UsageInUsermode = stats.PreCPUStats?.CPUUsage?.UsageInUsermode ?? 0,
+                    PercpuUsage = stats.PreCPUStats?.CPUUsage?.PercpuUsage
+                                  ?? new List<ulong>()
+                },
+
+                ThrottlingData = new DockerThrottlingData
+                {
+                    Periods = stats.PreCPUStats?.ThrottlingData?.Periods ?? 0,
+                    ThrottledPeriods = stats.PreCPUStats?.ThrottlingData?.ThrottledPeriods ?? 0,
+                    ThrottledTime = stats.PreCPUStats?.ThrottlingData?.ThrottledTime ?? 0
+                }
+            },
+
+            MemoryStats = new DockerMemoryStats
+            {
+                Usage = stats.MemoryStats?.Usage ?? 0,
+                MaxUsage = stats.MemoryStats?.MaxUsage ?? 0,
+                Failcnt = stats.MemoryStats?.Failcnt ?? 0,
+                Limit = stats.MemoryStats?.Limit ?? 0,
+                Commit = stats.MemoryStats?.Commit ?? 0,
+                CommitPeak = stats.MemoryStats?.CommitPeak ?? 0,
+                PrivateWorkingSet = stats.MemoryStats?.PrivateWorkingSet ?? 0,
+                Stats = stats.MemoryStats?.Stats
+                        ?? new Dictionary<string, ulong>()
+            },
+
+            StorageStats = new DockerStorageStats
+            {
+                ReadCountNormalized = stats.StorageStats?.ReadCountNormalized ?? 0,
+                ReadSizeBytes = stats.StorageStats?.ReadSizeBytes ?? 0,
+                WriteCountNormalized = stats.StorageStats?.WriteCountNormalized ?? 0,
+                WriteSizeBytes = stats.StorageStats?.WriteSizeBytes ?? 0
+            },
+
+            BlkioStats = new DockerBlkioStats
+            {
+                IoServiceBytesRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoServiceBytesRecursive),
+
+                IoServicedRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoServicedRecursive),
+
+                IoQueuedRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoQueuedRecursive),
+
+                IoServiceTimeRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoServiceTimeRecursive),
+
+                IoWaitTimeRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoWaitTimeRecursive),
+
+                IoMergedRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoMergedRecursive),
+
+                IoTimeRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.IoTimeRecursive),
+
+                SectorsRecursive = ConvertBlkioEntries(
+                    stats.BlkioStats?.SectorsRecursive)
+            },
+
+            Networks = stats.Networks?.ToDictionary(
+                           x => x.Key,
+                           x => new DockerNetworkStats
+                           {
+                               RxBytes = x.Value.RxBytes,
+                               RxPackets = x.Value.RxPackets,
+                               RxErrors = x.Value.RxErrors,
+                               RxDropped = x.Value.RxDropped,
+
+                               TxBytes = x.Value.TxBytes,
+                               TxPackets = x.Value.TxPackets,
+                               TxErrors = x.Value.TxErrors,
+                               TxDropped = x.Value.TxDropped,
+
+                               EndpointId = x.Value.EndpointID,
+                               InstanceId = x.Value.InstanceID
+                           })
+                       ?? new Dictionary<string, DockerNetworkStats>()
+        };
+    }
+
+    private static IList<DockerBlkioStatEntry> ConvertBlkioEntries(
+        IList<BlkioStatEntry>? entries)
+    {
+        if (entries == null)
+            return new List<DockerBlkioStatEntry>();
+
+        return entries.Select(x => new DockerBlkioStatEntry
+        {
+            Major = x.Major,
+            Minor = x.Minor,
+            Op = x.Op,
+            Value = x.Value
+        }).ToList();
     }
 }

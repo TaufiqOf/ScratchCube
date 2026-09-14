@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -277,7 +278,61 @@ public partial class DockerInstance : ViewModelBase
         var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
         return Mapper.ConvertToDockerContainerInspect(inspectResponse);
     }
+    public async Task StatsContainer(
+        DockerContainer? container,
+        IProgress<DockerContainerStatsResponse>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (container == null)
+            return;
 
+        var dockerProgress = new Progress<ContainerStatsResponse>(stats =>
+        {
+            var converted = Mapper.ConvertContainerStatsResponse(stats);
+            progress?.Report(converted);
+        });
+
+        await _client.Containers.GetContainerStatsAsync(
+            container.Id,
+            new ContainerStatsParameters
+            {
+                Stream = true
+            },
+            dockerProgress,
+            cancellationToken);
+    }
+    
+    public async Task LogsContainer(
+        DockerContainer? container,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (container == null)
+            return;
+
+        using var stream = await _client.Containers.GetContainerLogsAsync(
+            container.Id,
+            new ContainerLogsParameters
+            {
+                ShowStdout = true,
+                ShowStderr = true,
+                Follow = true,
+                Tail = "500"
+            },
+            cancellationToken);
+
+        using var reader = new StreamReader(stream);
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken);
+
+            if (line == null)
+                break;
+
+            progress?.Report(line + Environment.NewLine);
+        }
+    }
 
     private async void StartStopContainer(DockerContainer container)
     {

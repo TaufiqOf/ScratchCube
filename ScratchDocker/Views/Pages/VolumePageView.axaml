@@ -203,22 +203,6 @@
 
                 <DataGrid.Columns>
 
-                    <DataGridTemplateColumn Width="48">
-                        <DataGridTemplateColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.HeaderTemplate>
-
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="docker:DockerVolume">
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
                     <DataGridTemplateColumn Header="NAME"
                                             Width="280">
                         <DataGridTemplateColumn.CellTemplate>
