@@ -551,17 +551,6 @@
         <Border Grid.Row="3"
                 Padding="0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
-                <!-- ENGINE -->
-                <StackPanel Orientation="Horizontal"
-                            Spacing="8">
-                    <Ellipse Width="8"
-                             Height="8"
-                             Fill="{DynamicResource SystemControlSuccessBrush}"
-                             VerticalAlignment="Center" />
-                    <TextBlock Text="Engine running"
-                               FontSize="12"
-                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-                </StackPanel>
 
                 <!-- COUNT -->
 

@@ -46,5 +46,8 @@
         <DependentUpon>VolumePageView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\Controls\DockerContainerInspectControlView.axaml.cs">
+        <DependentUpon>DockerContainerInspectControlView.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>

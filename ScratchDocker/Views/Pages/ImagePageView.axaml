@@ -301,17 +301,6 @@
                 Padding="0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
 
-                <StackPanel Orientation="Horizontal"
-                            Spacing="8">
-                    <Ellipse Width="8"
-                             Height="8"
-                             Fill="{DynamicResource SystemControlSuccessBrush}"
-                             VerticalAlignment="Center" />
-                    <TextBlock Text="Engine running"
-                               FontSize="12"
-                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-                </StackPanel>
-
                 <TextBlock Grid.Column="2"
                            Text="{Binding Images.Count, StringFormat='{}{0} images'}"
                            FontSize="12"

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Docker.DotNet.Models;
 using ScratchDocker.ViewModels;
 
 namespace ScratchDocker.Models.Docker;
@@ -8,7 +7,7 @@ namespace ScratchDocker.Models.Docker;
 public partial class DockerEndpointSettings : ViewModelBase
 {
     [ObservableProperty]
-    private EndpointIPAMConfig _ipamConfig = default!;
+    private DockerEndpointIPAMConfig _ipamConfig = default!;
 
     [ObservableProperty]
     private IList<string> _links = new List<string>();
@@ -46,4 +45,17 @@ public partial class DockerEndpointSettings : ViewModelBase
     [ObservableProperty]
     private IDictionary<string, string> _driverOpts =
         new Dictionary<string, string>();
+}
+
+
+public partial class DockerEndpointIPAMConfig : ViewModelBase
+{
+    [ObservableProperty]
+    private string _ipv4Address;
+
+    [ObservableProperty]
+    private string _ipv6Address;
+
+    [ObservableProperty]
+    private IList<string> _linkLocalIPs;
 }

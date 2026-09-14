@@ -39,7 +39,6 @@ public partial class MainViewModel : ViewModelBase
 
     private void NavigateToPage(PageMenuItem pageMenuItem)
     {
-        
         CurrentPage = pageMenuItem.PageView;
         LazyLoadTimer.Start();
     }

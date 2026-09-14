@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using ScratchDocker.Helper;
 using ScratchDocker.Models.Docker;
 using ScratchDocker.ViewModels;
 
@@ -57,7 +58,7 @@ public partial class DockerInstance : ViewModelBase
             DockerContainers.Clear();
             foreach (var container in containers)
             {
-                var dockerContainer = ConvertToDockerContainer(container);
+                var dockerContainer = Mapper.ConvertToDockerContainer(container);
                 DockerContainers.Add(dockerContainer);
                 dockerContainer.OnStartStop += StartStopContainer;
                 dockerContainer.OnDelete += DeleteContainer;
@@ -84,7 +85,7 @@ public partial class DockerInstance : ViewModelBase
             DockerImages = new ObservableCollection<DockerImage>();
             foreach (var image in images)
             {
-                var dockerImage = ConvertToDockerImage(image);
+                var dockerImage = Mapper.ConvertToDockerImage(image);
                 dockerImage.OnDelete += DeleteImage;
                 DockerImages.Add(dockerImage);
             }
@@ -97,7 +98,6 @@ public partial class DockerInstance : ViewModelBase
             return new ObservableCollection<DockerImage>();
         }
     }
-
 
     public async Task<ObservableCollection<DockerVolume>> ListVolumes()
     {
@@ -113,7 +113,7 @@ public partial class DockerInstance : ViewModelBase
 
             foreach (var volume in volumes.Volumes)
             {
-                DockerVolumes.Add(ConvertToDockerVolume(volume));
+                DockerVolumes.Add(Mapper.ConvertToDockerVolume(volume));
             }
 
             return DockerVolumes;
@@ -136,7 +136,7 @@ public partial class DockerInstance : ViewModelBase
                 });
 
             var newContainers = containers
-                .Select(ConvertToDockerContainer)
+                .Select(Mapper.ConvertToDockerContainer)
                 .ToList();
 
             // Add / update
@@ -188,7 +188,7 @@ public partial class DockerInstance : ViewModelBase
                 All = true
             });
 
-            var newImages = images.Select(ConvertToDockerImage).ToList();
+            var newImages = images.Select(Mapper.ConvertToDockerImage).ToList();
             foreach (var dockerImage in newImages)
             {
                 var existingImage = DockerImages.FirstOrDefault(q => q.Id == dockerImage.Id);
@@ -231,7 +231,7 @@ public partial class DockerInstance : ViewModelBase
         {
             var volumes = await _client.Volumes.ListAsync();
 
-            var newVolumes = volumes.Volumes.Select(ConvertToDockerVolume).ToList();
+            var newVolumes = volumes.Volumes.Select(Mapper.ConvertToDockerVolume).ToList();
             foreach (var dockerVolume in newVolumes)
             {
                 var existingVolume = DockerVolumes.FirstOrDefault(q => q.Mountpoint == dockerVolume.Mountpoint);
@@ -267,7 +267,13 @@ public partial class DockerInstance : ViewModelBase
             Console.WriteLine(e);
         }
     }
-    
+
+    public async Task<DockerContainerInspect> InspectContainer(DockerContainer container)
+    {
+        var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
+        return Mapper.ConvertToDockerContainerInspect(inspectResponse);
+    }
+
 
     private async void StartStopContainer(DockerContainer container)
     {
@@ -281,7 +287,7 @@ public partial class DockerInstance : ViewModelBase
             await StartDockerContainer(container);
         }
     }
-    
+
     private async Task StopDockerContainer(DockerContainer container)
     {
         await _client.Containers.StopContainerAsync(container.Id, new ContainerStopParameters());
@@ -292,7 +298,7 @@ public partial class DockerInstance : ViewModelBase
         await _client.Containers.StartContainerAsync(container.Id, new ContainerStartParameters());
     }
 
-    
+
     private async void DeleteContainer(DockerContainer obj)
     {
         await _client.Containers.RemoveContainerAsync(obj.Id, new ContainerRemoveParameters
@@ -300,7 +306,7 @@ public partial class DockerInstance : ViewModelBase
             Force = true
         });
     }
-    
+
     private async void DeleteImage(DockerImage obj)
     {
         await _client.Images.DeleteImageAsync(obj.Id, new ImageDeleteParameters
@@ -312,91 +318,5 @@ public partial class DockerInstance : ViewModelBase
     private async void DeleteVolume(DockerVolume obj)
     {
         await _client.Volumes.RemoveAsync(obj.Name, true);
-    }
-    
-
-    private static DockerContainer ConvertToDockerContainer(ContainerListResponse container)
-    {
-        var dockerContainer = new DockerContainer
-        {
-            Id = container.ID,
-            Names = container.Names,
-            Image = container.Image,
-            ImageID = container.ImageID,
-            Command = container.Command,
-            Created = container.Created,
-            SizeRw = container.SizeRw,
-            SizeRootFs = container.SizeRootFs,
-            Labels = container.Labels,
-            State = container.State,
-            Status = container.Status,
-        };
-
-        foreach (var dockerContainerPort in container.Ports)
-        {
-            dockerContainer.Ports.Add(new DockerPort
-            {
-                Ip = dockerContainerPort.IP,
-                PrivatePort = dockerContainerPort.PrivatePort,
-                PublicPort = dockerContainerPort.PublicPort,
-                Type = dockerContainerPort.Type,
-            });
-        }
-
-        foreach (var containerMount in container.Mounts)
-        {
-            dockerContainer.Mounts.Add(new DockerMountPoint
-            {
-                Name = containerMount.Name,
-                Source = containerMount.Source,
-                Destination = containerMount.Destination,
-                Driver = containerMount.Driver,
-                Mode = containerMount.Mode,
-                Rw = containerMount.RW,
-                Propagation = containerMount.Propagation
-            });
-        }
-
-        dockerContainer.NetworkSettings = new DockerSummaryNetworkSettings();
-        container.NetworkSettings.Networks?.ToList().ForEach(network =>
-        {
-            dockerContainer.NetworkSettings.Networks.Add(
-                network.Key,
-                new DockerEndpointSettings
-                {
-                    IpAddress = network.Value.IPAddress,
-                    Gateway = network.Value.Gateway,
-                    MacAddress = network.Value.MacAddress,
-                    NetworkID = network.Value.NetworkID
-                });
-        });
-
-        return dockerContainer;
-    }
-
-    private static DockerImage ConvertToDockerImage(ImagesListResponse image)
-    {
-        return new DockerImage
-        {
-            Id = image.ID,
-            RepoTags = image.RepoTags ?? new List<string>(),
-            Created = image.Created,
-            Size = image.Size,
-            Containers = image.Containers
-        };
-    }
-
-    private static DockerVolume ConvertToDockerVolume(VolumeResponse volume)
-    {
-        return new DockerVolume
-        {
-            Name = volume.Name ?? string.Empty,
-            Driver = volume.Driver ?? string.Empty,
-            Mountpoint = volume.Mountpoint ?? string.Empty,
-            Scope = volume.Scope ?? string.Empty,
-            CreatedAt = volume.CreatedAt ?? string.Empty,
-            RefCount = volume.UsageData?.RefCount ?? 0,
-            Size = volume.UsageData?.Size ?? 0
-        };
     }
 }
