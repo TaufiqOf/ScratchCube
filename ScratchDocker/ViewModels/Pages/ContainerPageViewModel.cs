@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using ScratchDocker.Models;
 using ScratchDocker.Models.Docker;
 using ScratchDocker.Service;
+using ScratchDocker.ViewModels.Controls;
 
 namespace ScratchDocker.ViewModels.Pages;
 
@@ -24,8 +24,28 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
     public partial ObservableCollection<DockerContainer> FilteredContainers { get; private set; }
         = new();
 
-    private readonly DockerService _dockerService = DockerService.Instance;
+    public DockerContainer SelectedContainer
+    {
+        get;
+        set
+        {
+            if (Equals(value, field)) return;
+            field = value;
+            OnPropertyChanged();
+            OnContainerSelectionChanged();
+        }
+    }
 
+    private async void OnContainerSelectionChanged()
+    {
+        // var inspect = await _selectedInstance.InspectContainer(SelectedContainer);
+        // DockerContainerInspectControlViewModel.SetInspect(inspect);
+    }
+
+    [ObservableProperty]
+    private DockerContainerInspectControlViewModel _dockerContainerInspectControlViewModel = new();
+
+    private readonly DockerService _dockerService = DockerService.Instance;
     private DockerInstance? _selectedInstance;
     public ContainerPageViewModel()
     {

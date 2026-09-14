@@ -3,6 +3,7 @@
              xmlns:vm="using:ScratchDocker.ViewModels.Pages"
              xmlns:docker="using:ScratchDocker.Models.Docker"
              xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             xmlns:controls="clr-namespace:ScratchDocker.Views.Controls"
              x:Class="ScratchDocker.Views.Pages.ContainerPageView"
              x:DataType="vm:ContainerPageViewModel">
 
@@ -225,7 +226,7 @@
     </UserControl.Styles>
 
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto"
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
           Margin="28,24,28,0">
 
 
@@ -350,39 +351,40 @@
                 CornerRadius="6"
                 ClipToBounds="True">
 
-                <DataGrid ItemsSource="{Binding FilteredContainers}"
-                          VerticalAlignment="Stretch"
-                          HorizontalAlignment="Stretch"
-                          SelectionMode="Single"
-                          AutoGenerateColumns="False"
-                          CanUserResizeColumns="True"
-                          CanUserReorderColumns="True"
-                          IsReadOnly="True">
+            <DataGrid ItemsSource="{Binding FilteredContainers}"
+                      SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch"
+                      SelectionMode="Single"
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True"
+                      CanUserReorderColumns="True"
+                      IsReadOnly="True">
 
-                        <DataGrid.Styles>
+                <DataGrid.Styles>
 
-                                <!-- Remove the white focus rectangle around the current cell -->
-                                <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
-                                        <Setter Property="IsVisible" Value="False"/>
-                                </Style>
+                    <!-- Remove the white focus rectangle around the current cell -->
+                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
 
-                                <!-- Remove the current-cell rectangle -->
-                                <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
-                                        <Setter Property="IsVisible" Value="False"/>
-                                </Style>
+                    <!-- Remove the current-cell rectangle -->
+                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
 
-                                <!-- Also remove cell border -->
-                                <Style Selector="DataGridCell">
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                </Style>
+                    <!-- Also remove cell border -->
+                    <Style Selector="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0" />
+                    </Style>
 
-                                <!-- Keep the row selection background -->
-                                <Style Selector="DataGridRow:selected">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SystemControlHighlightListAccentLowBrush}"/>
-                                </Style>
+                    <!-- Keep the row selection background -->
+                    <Style Selector="DataGridRow:selected">
+                        <Setter Property="Background"
+                                Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
+                    </Style>
 
-                        </DataGrid.Styles>
+                </DataGrid.Styles>
 
                 <DataGrid.Columns>
 
@@ -510,13 +512,13 @@
                                             Spacing="2"
                                             VerticalAlignment="Center">
 
-                                        <Button Classes="iconButton"
-                                                Command="{Binding StartStopCommand}"
-                                                ToolTip.Tip="{Binding StartStopTooltip}">
-                                                <fluent:FluentIcon Icon="{Binding StartStopIcon}"
-                                                                   Width="17"
-                                                                   Height="17" />
-                                        </Button>
+                                    <Button Classes="iconButton"
+                                            Command="{Binding StartStopCommand}"
+                                            ToolTip.Tip="{Binding StartStopTooltip}">
+                                        <fluent:FluentIcon Icon="{Binding StartStopIcon}"
+                                                           Width="17"
+                                                           Height="17" />
+                                    </Button>
 
                                     <!-- MORE -->
                                     <Button Classes="iconButton"
@@ -543,12 +545,19 @@
             </DataGrid>
         </Border>
 
-
+        <!-- ====================================================== -->
+        <!-- Details                                                -->
+        <!-- ====================================================== -->
+        <TabControl Grid.Row="3" Height="300">
+            <TabItem Header="Inspect">
+                <controls:DockerContainerInspectControlView />
+            </TabItem>
+        </TabControl>
         <!-- ====================================================== -->
         <!-- FOOTER                                                 -->
         <!-- ====================================================== -->
 
-        <Border Grid.Row="3"
+        <Border Grid.Row="4"
                 Padding="0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
 
