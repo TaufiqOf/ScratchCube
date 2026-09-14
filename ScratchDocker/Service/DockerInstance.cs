@@ -268,8 +268,12 @@ public partial class DockerInstance : ViewModelBase
         }
     }
 
-    public async Task<DockerContainerInspect> InspectContainer(DockerContainer container)
+    public async Task<DockerContainerInspect?> InspectContainer(DockerContainer? container)
     {
+        if(container == null)
+        {
+            return null;
+        }
         var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
         return Mapper.ConvertToDockerContainerInspect(inspectResponse);
     }

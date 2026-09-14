@@ -342,7 +342,7 @@ public static class Mapper
 
             Ports = source.Ports?.ToDictionary(
                 x => x.Key,
-                x => (IList<DockerPortBinding>)x.Value.Select(p =>
+                x => (IList<DockerPortBinding>)x.Value?.Select(p =>
                     new DockerPortBinding
                     {
                         HostIP = p.HostIP,

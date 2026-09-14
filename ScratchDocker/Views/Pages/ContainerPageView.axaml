@@ -550,7 +550,8 @@
         <!-- ====================================================== -->
         <TabControl Grid.Row="3" Height="300">
             <TabItem Header="Inspect">
-                <controls:DockerContainerInspectControlView />
+                <controls:DockerContainerInspectControlView
+                    DataContext="{Binding DockerContainerInspectControlViewModel}" />
             </TabItem>
         </TabControl>
         <!-- ====================================================== -->

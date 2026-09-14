@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:ScratchDocker.ViewModels.Controls"
              x:Class="ScratchDocker.Views.Controls.DockerContainerInspectControlView"
-             x:DataType="vm:DockerContainerInspectControlViewModel">
+             x:CompileBindings="False">
 
     <Grid RowDefinitions="Auto,*">
         <TextBlock Grid.Row="0"

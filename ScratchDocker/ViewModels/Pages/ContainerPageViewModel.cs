@@ -38,8 +38,8 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
 
     private async void OnContainerSelectionChanged()
     {
-        // var inspect = await _selectedInstance.InspectContainer(SelectedContainer);
-        // DockerContainerInspectControlViewModel.SetInspect(inspect);
+        var inspect = await _selectedInstance.InspectContainer(SelectedContainer);
+        DockerContainerInspectControlViewModel.SetInspect(inspect);
     }
 
     [ObservableProperty]
