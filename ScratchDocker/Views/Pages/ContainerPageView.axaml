@@ -12,7 +12,8 @@
 
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
-          Margin="28,24,28,0">
+          Margin="28,24,28,0"
+          IsEnabled="{Binding IsConnected}">
 
 
         <!-- ====================================================== -->

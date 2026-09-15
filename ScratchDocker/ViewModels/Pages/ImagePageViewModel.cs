@@ -12,38 +12,55 @@ namespace ScratchDocker.ViewModels.Pages;
 
 public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
 {
-    [ObservableProperty]
-    private string _searchText = string.Empty;
+    [ObservableProperty] private string _searchText = string.Empty;
 
-    [ObservableProperty]
-    public partial ObservableCollection<DockerImage> Images { get; private set; } = new();
+    [ObservableProperty] public partial ObservableCollection<DockerImage> Images { get; private set; } = new();
 
-    [ObservableProperty]
-    public partial ObservableCollection<DockerImage> FilteredImages { get; private set; } = new();
+    [ObservableProperty] public partial ObservableCollection<DockerImage> FilteredImages { get; private set; } = new();
 
     private readonly DockerService _dockerService = DockerService.Instance;
-    private readonly DockerInstance _selectedInstance;
+    [ObservableProperty] private bool _isConnected;
 
     public ImagePageViewModel()
     {
-        _selectedInstance = _dockerService.DockerInstances[0];
-        _selectedInstance.OnImageAdded = image =>
-        {
-            Images.Add(image);
-            ApplySearch();
-        };
-        _selectedInstance.OnImageRemoved = image =>
-        {
-            Images.Remove(image);
-            ApplySearch();
-        };
-        _dockerService.Connect(_selectedInstance);
+        DockerService.OnConnectionStatusChanged += OnConnectionStatusChanged;
     }
 
     public async Task LoadData()
     {
-        Images = await _dockerService.GetImages(_selectedInstance);
-        ApplySearch();
+        DockerService.CurrentInstance.OnImageAdded = image =>
+        {
+            Images.Add(image);
+            ApplySearch();
+        };
+        DockerService.CurrentInstance.OnImageRemoved = image =>
+        {
+            Images.Remove(image);
+            ApplySearch();
+        };
+        OnConnectionStatusChanged(DockerService.CurrentInstance.IsConnected);
+    }
+
+    private async void OnConnectionStatusChanged(bool status)
+    {
+        {
+            if (IsConnected != status)
+            {
+                if (!status)
+                {
+                    Images.Clear();
+                    FilteredImages.Clear();
+                }
+                else
+                {
+                    (await _dockerService.GetImages(DockerService.CurrentInstance)).ToList().ForEach(Images.Add);
+                }
+                ApplySearch();
+            }
+
+            IsConnected = status;
+        }
+        ;
     }
 
     partial void OnSearchTextChanged(string value)
@@ -71,7 +88,7 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Images = await _dockerService.GetImages(_selectedInstance);
+        Images = await _dockerService.GetImages(DockerService.CurrentInstance);
         ApplySearch();
     }
 }

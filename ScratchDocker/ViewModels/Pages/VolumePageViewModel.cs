@@ -22,30 +22,48 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     public partial ObservableCollection<DockerVolume> FilteredVolumes { get; private set; } = new();
 
     private readonly DockerService _dockerService = DockerService.Instance;
-    private readonly DockerInstance _selectedInstance;
+    [ObservableProperty] private bool _isConnected;
 
     public VolumePageViewModel()
     {
-        _selectedInstance = _dockerService.DockerInstances[0];
-        _selectedInstance.OnVolumeAdded = volume =>
-        {
-            Volumes.Add(volume);
-            ApplySearch();
-        };
-        _selectedInstance.OnVolumeRemoved = volume =>
-        {
-            Volumes.Remove(volume);
-            ApplySearch();
-        };
-        _dockerService.Connect(_selectedInstance);
+        DockerService.OnConnectionStatusChanged += OnConnectionStatusChanged;
+
     }
 
     public async Task LoadData()
     {
-        Volumes = await _dockerService.GetVolumes(_selectedInstance);
-        ApplySearch();
-    }
 
+        DockerService.CurrentInstance.OnVolumeAdded = volume =>
+        {
+            Volumes.Add(volume);
+            ApplySearch();
+        };
+        DockerService.CurrentInstance.OnVolumeRemoved = volume =>
+        {
+            Volumes.Remove(volume);
+            ApplySearch();
+        };
+        OnConnectionStatusChanged(DockerService.CurrentInstance.IsConnected);
+    }
+    private async void OnConnectionStatusChanged(bool status)
+    {
+        {
+            if (IsConnected != status)
+            {
+                if (!status)
+                {
+                    Volumes.Clear();
+                    FilteredVolumes.Clear();
+                }
+                else
+                {
+                    (await _dockerService.GetVolumes(DockerService.CurrentInstance)).ToList().ForEach(Volumes.Add);
+                }
+                ApplySearch();
+            }
+            IsConnected = status;
+        };
+    }
     partial void OnSearchTextChanged(string value)
     {
         ApplySearch();
@@ -73,7 +91,7 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Volumes = await _dockerService.GetVolumes(_selectedInstance);
+        Volumes = await _dockerService.GetVolumes(DockerService.CurrentInstance);
         ApplySearch();
     }
 }

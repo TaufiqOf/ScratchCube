@@ -111,12 +111,12 @@
 
                     <Ellipse Width="8"
                              Height="8"
-                             Fill="{DynamicResource SystemControlSuccessBrush}"
+                             Fill="{Binding EngineStatusColor}"
                              VerticalAlignment="Center"
                              Margin="0,0,8,0"/>
 
                     <TextBlock Grid.Column="1"
-                               Text="Engine running"
+                               Text="{Binding EngineStatusText}"
                                FontSize="12"
                                Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                                VerticalAlignment="Center"/>

@@ -91,6 +91,7 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto"
+          IsEnabled="{Binding IsConnected}"
           Margin="28,24,28,0">
 
         <Grid Grid.Row="0"

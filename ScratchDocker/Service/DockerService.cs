@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -11,12 +12,32 @@ public class DockerService
 {
     public static readonly Timer RefreshTimer = new Timer(5000);
     public readonly ObservableCollection<DockerInstance> DockerInstances;
+    public static Action<bool>? OnConnectionStatusChanged;
+
 
     private DockerService()
     {
         DockerInstances = new ObservableCollection<DockerInstance>();
         RefreshTimer.Elapsed += RefreshTimerOnElapsed;
         RefreshTimer.Start();
+    }
+
+    public static DockerInstance CurrentInstance
+    {
+        get => _currentInstance;
+        set
+        {
+            if (_currentInstance != value)
+            {
+                _currentInstance = value;
+                _currentInstance.OnConnectionStatusChanged+= CurrentInstanceOnConnectionStatusChanged;
+            }
+        }
+    }
+
+    private static void CurrentInstanceOnConnectionStatusChanged(bool obj)
+    {
+        OnConnectionStatusChanged?.Invoke(obj);
     }
 
 
@@ -26,6 +47,7 @@ public class DockerService
     }
 
     private static DockerService _instance;
+    private static DockerInstance _currentInstance;
 
     public void AddDockerInstance(string uri)
     {

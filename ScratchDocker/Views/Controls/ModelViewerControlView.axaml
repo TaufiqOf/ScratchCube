@@ -69,23 +69,6 @@
                                         Binding="{Binding Value}" />
                 </DataGrid.Columns>
             </DataGrid>
-            <!-- <ScrollViewer> -->
-            <!--     <ItemsControl ItemsSource="{Binding Properties}"> -->
-            <!--         <ItemsControl.ItemTemplate> -->
-            <!--             <DataTemplate x:DataType="vm:DockerInspectPropertyItem"> -->
-            <!--                 <Grid Margin="0,2" -->
-            <!--                       ColumnDefinitions="4*,6*"> -->
-            <!--                     <TextBlock Grid.Column="0" -->
-            <!--                                Text="{Binding DisplayPath}" -->
-            <!--                                TextTrimming="CharacterEllipsis" /> -->
-            <!--                     <TextBlock Grid.Column="1" -->
-            <!--                                Text="{Binding Value}" -->
-            <!--                                TextWrapping="Wrap" /> -->
-            <!--                 </Grid> -->
-            <!--             </DataTemplate> -->
-            <!--         </ItemsControl.ItemTemplate> -->
-            <!--     </ItemsControl> -->
-            <!-- </ScrollViewer> -->
         </Border>
     </Grid>
 </UserControl>

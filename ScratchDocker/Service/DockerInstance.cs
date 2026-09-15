@@ -16,6 +16,8 @@ namespace ScratchDocker.Service;
 
 public partial class DockerInstance : ViewModelBase
 {
+    [ObservableProperty] private bool _isConnected;
+    public Action<bool>? OnConnectionStatusChanged;
     private DockerClient _client;
     private string _uri;
     private string _name;
@@ -44,9 +46,47 @@ public partial class DockerInstance : ViewModelBase
         DockerImages = new ObservableCollection<DockerImage>();
     }
 
-    public void Connect()
+    public async Task<bool> GetIsConnected()
     {
-        _client = new DockerClientConfiguration(new Uri(_uri)).CreateClient();
+        var currentConnection = IsConnected;
+        try
+        {
+            await _client.System.PingAsync();
+            IsConnected = true;
+            return true;
+        }
+        catch
+        {
+            IsConnected = false;
+            return false;
+        }
+        finally
+        {
+            if (currentConnection != IsConnected)
+                OnConnectionStatusChanged?.Invoke(IsConnected);
+        }
+    }
+
+    public async Task<bool> Connect()
+    {
+        try
+        {
+            _client = new DockerClientConfiguration(new Uri(_uri))
+                .CreateClient();
+
+            await _client.System.PingAsync();
+
+            IsConnected = true;
+            OnConnectionStatusChanged?.Invoke(true);
+            return true;
+        }
+        catch (Exception e)
+        {
+            IsConnected = false;
+            OnConnectionStatusChanged?.Invoke(false);
+            Console.WriteLine(e);
+            return false;
+        }
     }
 
 
@@ -271,13 +311,15 @@ public partial class DockerInstance : ViewModelBase
 
     public async Task<DockerContainerInspect?> InspectContainer(DockerContainer? container)
     {
-        if(container == null)
+        if (container == null)
         {
             return null;
         }
+
         var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
         return Mapper.ConvertToDockerContainerInspect(inspectResponse);
     }
+
     public async Task StatsContainer(
         DockerContainer? container,
         IProgress<DockerContainerStatsResponse>? progress = null,
@@ -301,7 +343,7 @@ public partial class DockerInstance : ViewModelBase
             dockerProgress,
             cancellationToken);
     }
-    
+
     public async Task LogsContainer(
         DockerContainer? container,
         IProgress<string>? progress = null,
