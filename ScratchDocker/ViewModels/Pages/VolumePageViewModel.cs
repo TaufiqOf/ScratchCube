@@ -26,24 +26,24 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
 
     public VolumePageViewModel()
     {
-        DockerService.OnConnectionStatusChanged += OnConnectionStatusChanged;
+        DockerService.Instance.OnConnectionStatusChanged += OnConnectionStatusChanged;
 
     }
 
     public async Task LoadData()
     {
 
-        DockerService.CurrentInstance.OnVolumeAdded = volume =>
+        DockerService.Instance.OnVolumeAdded = volume =>
         {
             Volumes.Add(volume);
             ApplySearch();
         };
-        DockerService.CurrentInstance.OnVolumeRemoved = volume =>
+        DockerService.Instance.OnVolumeRemoved = volume =>
         {
             Volumes.Remove(volume);
             ApplySearch();
         };
-        OnConnectionStatusChanged(DockerService.CurrentInstance.IsConnected);
+        OnConnectionStatusChanged(DockerService.Instance.IsConnected);
     }
     private async void OnConnectionStatusChanged(bool status)
     {
@@ -57,7 +57,7 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
                 }
                 else
                 {
-                    (await _dockerService.GetVolumes(DockerService.CurrentInstance)).ToList().ForEach(Volumes.Add);
+                    (await _dockerService.GetVolumes()).ToList().ForEach(Volumes.Add);
                 }
                 ApplySearch();
             }
@@ -91,7 +91,7 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Volumes = await _dockerService.GetVolumes(DockerService.CurrentInstance);
+        Volumes = await _dockerService.GetVolumes();
         ApplySearch();
     }
 }

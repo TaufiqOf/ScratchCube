@@ -68,23 +68,23 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
         Containers = new ObservableCollection<DockerContainer>();
         _inspectModelViewerControlViewModel = new ModelViewerControlViewModel<DockerContainerInspect>(null);
         _statsModelViewerControlViewModel = new ModelViewerControlViewModel<DockerContainerStatsResponse>(null);
-        DockerService.OnConnectionStatusChanged += OnConnectionStatusChanged;
+        DockerService.Instance.OnConnectionStatusChanged += OnConnectionStatusChanged;
 
     }
 
     public async Task LoadData()
     {
-        DockerService.CurrentInstance.OnContainerAdded = container =>
+        DockerService.Instance.OnContainerAdded = container =>
         {
             Containers.Add(container);
             ApplySearch();
         };
-        DockerService.CurrentInstance.OnContainerRemoved = container =>
+        DockerService.Instance.OnContainerRemoved = container =>
         {
             Containers.Remove(container);
             ApplySearch();
         };
-        OnConnectionStatusChanged(DockerService.CurrentInstance.IsConnected);
+        OnConnectionStatusChanged(DockerService.Instance.IsConnected);
     }
 
     private async void OnConnectionStatusChanged(bool status)
@@ -99,7 +99,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
                 }
                 else
                 {
-                    (await _dockerService.GetContainers(DockerService.CurrentInstance)).ToList().ForEach(Containers.Add);
+                    (await _dockerService.GetContainers()).ToList().ForEach(Containers.Add);
                 }
                 ApplySearch();
             }
@@ -139,8 +139,8 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     private async Task Refresh()
     {
-        await DockerService.CurrentInstance.RefreshContainers();
-        Containers = DockerService.CurrentInstance.DockerContainers;
+        await DockerService.Instance.RefreshContainers();
+        Containers = DockerService.Instance.DockerContainers;
         ApplySearch();
     }
 
@@ -172,7 +172,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
         {
             return;
         }
-        var inspect = await DockerService.CurrentInstance.InspectContainer(SelectedContainer);
+        var inspect = await DockerService.Instance.InspectContainer(SelectedContainer);
         InspectModelViewerControlViewModel?.SetInspect(inspect);
     }
 
@@ -184,7 +184,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
             return;
         }
 
-        await DockerService.CurrentInstance.StatsContainer(SelectedContainer,
+        await DockerService.Instance.StatsContainer(SelectedContainer,
             new Progress<DockerContainerStatsResponse>(stats =>
             {
                 Dispatcher.UIThread.Post(() => { StatsModelViewerControlViewModel?.SetInspect(stats); },
@@ -199,7 +199,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
         if (SelectedContainer == null)
             return;
 
-        await DockerService.CurrentInstance.LogsContainer(
+        await DockerService.Instance.LogsContainer(
             SelectedContainer,
             new Progress<string>(log =>
             {

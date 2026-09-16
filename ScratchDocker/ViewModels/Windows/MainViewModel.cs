@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using FluentIcons.Common;
 using ScratchDocker.Models;
 using ScratchDocker.Service;
@@ -18,22 +19,39 @@ public partial class MainViewModel : ViewModelBase
     public MenuControlViewModel MenuControlViewModel { get; set; }
 
     private Timer LazyLoadTimer { get; set; } = new Timer(300);
-    private Timer LazyLoadConnectionTimer { get; set; } = new Timer(10000);
+    private Timer LazyLoadConnectionTimer { get; set; } = new Timer(3000);
 
     public MainViewModel()
     {
         DockerService.Instance.AddDefaultDockerInstance();
-        DockerService.CurrentInstance = DockerService.Instance.DockerInstances[0];
+        DockerService.Instance.CurrentInstance = DockerService.Instance.DockerInstances[0];
         MenuControlViewModel = new MenuControlViewModel(NavigateToPage, new List<PageMenuItem>
         {
             new("Containers", Icon.BoxMultiple, new Views.Pages.ContainerPageView(new ContainerPageViewModel())),
             new("Images", Icon.Layer, new Views.Pages.ImagePageView(new ImagePageViewModel())),
             new("Volumes", Icon.Database, new Views.Pages.VolumePageView(new VolumePageViewModel())),
         });
+        MenuControlViewModel.OnStartEngine += OnStartEngine;
+        MenuControlViewModel.OnStopEngine += OnStopEngine;
+        MenuControlViewModel.OnSettingsEngine += OnSettingsEngine;
         LazyLoadTimer.Elapsed += LazyLoadTimerOnElapsed;
         LazyLoadConnectionTimer.Elapsed += LazyLoadConnectionTimerOnElapsed;
         LazyLoadConnectionTimer.Start();
         MenuControlViewModel.SelectedMenuItem = MenuControlViewModel.MenuItems[0];
+    }
+
+    private void OnSettingsEngine()
+    {
+    }
+
+    private void OnStopEngine()
+    {
+        DockerService.Instance.StopEngine();
+    }
+
+    private void OnStartEngine()
+    {
+        DockerService.Instance.StartEngine();
     }
 
     private async void LazyLoadConnectionTimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -43,10 +61,10 @@ public partial class MainViewModel : ViewModelBase
         Dispatcher.UIThread.Post(async () =>
         {
             LazyLoadConnectionTimer.Stop();
-            var connected = await DockerService.CurrentInstance.GetIsConnected();
+            var connected = DockerService.Instance.IsConnected;
             if(!connected)
             {
-                await DockerService.CurrentInstance.Connect();
+                await DockerService.Instance.Connect();
        
             }
             LazyLoadConnectionTimer.Interval = 2000; // 2 seconds
@@ -67,4 +85,6 @@ public partial class MainViewModel : ViewModelBase
         CurrentPage = pageMenuItem.PageView;
         LazyLoadTimer.Start();
     }
+    
+    
 }

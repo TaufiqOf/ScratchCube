@@ -1,42 +1,62 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Threading;
 using ScratchDocker.Models.Docker;
+using Timer = System.Timers.Timer;
 
 namespace ScratchDocker.Service;
 
 public class DockerService
 {
-    public static readonly Timer RefreshTimer = new Timer(5000);
+    public readonly Timer RefreshTimer = new Timer(5000);
     public readonly ObservableCollection<DockerInstance> DockerInstances;
-    public static Action<bool>? OnConnectionStatusChanged;
 
 
     private DockerService()
     {
         DockerInstances = new ObservableCollection<DockerInstance>();
         RefreshTimer.Elapsed += RefreshTimerOnElapsed;
+      
         RefreshTimer.Start();
     }
 
-    public static DockerInstance CurrentInstance
+    public DockerInstance? CurrentInstance
     {
         get => _currentInstance;
         set
         {
-            if (_currentInstance != value)
+            if (_currentInstance != null)
             {
-                _currentInstance = value;
-                _currentInstance.OnConnectionStatusChanged+= CurrentInstanceOnConnectionStatusChanged;
+                _currentInstance.OnConnectionStatusChanged -= CurrentInstanceOnConnectionStatusChanged;
+            }
+            _currentInstance = value;
+            if (_currentInstance != null)
+            {
+                _currentInstance.OnConnectionStatusChanged += CurrentInstanceOnConnectionStatusChanged;
             }
         }
     }
 
-    private static void CurrentInstanceOnConnectionStatusChanged(bool obj)
+    public bool IsConnected { get; set; }
+    public Action<bool>? OnConnectionStatusChanged;
+    public Action<DockerContainer>? OnContainerAdded { get; set; }
+    public Action<DockerContainer>? OnContainerRemoved { get; set; }
+
+    public ObservableCollection<DockerContainer> DockerContainers { get; set; } =
+        new ObservableCollection<DockerContainer>();
+
+    public Action<DockerImage>? OnImageAdded { get; set; }
+    public Action<DockerImage>? OnImageRemoved { get; set; }
+    public Action<DockerVolume>? OnVolumeRemoved { get; set; }
+    public Action<DockerVolume>? OnVolumeAdded { get; set; }
+
+    private void CurrentInstanceOnConnectionStatusChanged(bool obj)
     {
+        IsConnected = obj;
         OnConnectionStatusChanged?.Invoke(obj);
     }
 
@@ -46,8 +66,8 @@ public class DockerService
         get { return _instance ??= new DockerService(); }
     }
 
-    private static DockerService _instance;
-    private static DockerInstance _currentInstance;
+    private static DockerService? _instance;
+    private static DockerInstance? _currentInstance;
 
     public void AddDockerInstance(string uri)
     {
@@ -71,25 +91,41 @@ public class DockerService
     {
         DockerInstances.Clear();
     }
-    
-    public void Connect(DockerInstance instance)
+
+    public async Task Connect()
     {
-        instance.Connect();
+        if(CurrentInstance == null)
+        {
+            throw new InvalidOperationException("No Docker instance selected.");
+        }
+        await CurrentInstance.Connect();
     }
 
-    public async Task<ObservableCollection<DockerContainer>> GetContainers(DockerInstance instanceDockerInstance)
+    public async Task<ObservableCollection<DockerContainer>> GetContainers()
     {
-        return await instanceDockerInstance.ListContainers();
+        if(CurrentInstance == null)
+        {
+            throw new InvalidOperationException("No Docker instance selected.");
+        }
+        return (await CurrentInstance.ListContainers()) ?? new ObservableCollection<DockerContainer>();
     }
 
-    public async Task<ObservableCollection<DockerImage>> GetImages(DockerInstance instanceDockerInstance)
+    public async Task<ObservableCollection<DockerImage>> GetImages()
     {
-        return await instanceDockerInstance.ListImages();
+        if(CurrentInstance == null)
+        {
+            throw new InvalidOperationException("No Docker instance selected.");
+        }
+        return (await CurrentInstance.ListImages()) ?? new ObservableCollection<DockerImage>();
     }
 
-    public async Task<ObservableCollection<DockerVolume>> GetVolumes(DockerInstance instanceDockerInstance)
+    public async Task<ObservableCollection<DockerVolume>> GetVolumes()
     {
-        return await instanceDockerInstance.ListVolumes();
+        if(CurrentInstance == null)
+        {
+            throw new InvalidOperationException("No Docker instance selected.");
+        }
+        return (await CurrentInstance.ListVolumes()) ?? new ObservableCollection<DockerVolume>();
     }
 
     private async void RefreshTimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -108,5 +144,49 @@ public class DockerService
         }
 
         RefreshTimer.Start();
+    }
+
+    public async Task StartEngine()
+    {
+
+    }
+
+    public void StopEngine()
+    {
+    }
+
+    public async Task RefreshContainers()
+    {
+        if (CurrentInstance != null)
+        {
+            await CurrentInstance.RefreshContainers();
+        }
+    }
+
+    public async Task<DockerContainerInspect?> InspectContainer(DockerContainer selectedContainer)
+    {
+        if (CurrentInstance != null)
+        {
+            return await CurrentInstance.InspectContainer(selectedContainer);
+        }
+        return null;
+    }
+
+    public async Task StatsContainer(DockerContainer selectedContainer,
+        Progress<DockerContainerStatsResponse> progress, CancellationToken token)
+    {
+        if (CurrentInstance != null)
+        {
+            await CurrentInstance.StatsContainer(selectedContainer, progress, token);
+        }
+    }
+
+    public async Task LogsContainer(DockerContainer selectedContainer, Progress<string> progress,
+        CancellationToken token)
+    {
+        if (CurrentInstance != null)
+        {
+            await CurrentInstance.LogsContainer(selectedContainer, progress, token);
+        }
     }
 }

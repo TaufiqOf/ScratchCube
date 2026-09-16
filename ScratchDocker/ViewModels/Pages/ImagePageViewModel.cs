@@ -23,22 +23,22 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
 
     public ImagePageViewModel()
     {
-        DockerService.OnConnectionStatusChanged += OnConnectionStatusChanged;
+        DockerService.Instance.OnConnectionStatusChanged += OnConnectionStatusChanged;
     }
 
     public async Task LoadData()
     {
-        DockerService.CurrentInstance.OnImageAdded = image =>
+        DockerService.Instance.OnImageAdded = image =>
         {
             Images.Add(image);
             ApplySearch();
         };
-        DockerService.CurrentInstance.OnImageRemoved = image =>
+        DockerService.Instance.OnImageRemoved = image =>
         {
             Images.Remove(image);
             ApplySearch();
         };
-        OnConnectionStatusChanged(DockerService.CurrentInstance.IsConnected);
+        OnConnectionStatusChanged(DockerService.Instance.IsConnected);
     }
 
     private async void OnConnectionStatusChanged(bool status)
@@ -53,7 +53,7 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
                 }
                 else
                 {
-                    (await _dockerService.GetImages(DockerService.CurrentInstance)).ToList().ForEach(Images.Add);
+                    (await _dockerService.GetImages()).ToList().ForEach(Images.Add);
                 }
                 ApplySearch();
             }
@@ -88,7 +88,7 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Images = await _dockerService.GetImages(DockerService.CurrentInstance);
+        Images = await _dockerService.GetImages();
         ApplySearch();
     }
 }
