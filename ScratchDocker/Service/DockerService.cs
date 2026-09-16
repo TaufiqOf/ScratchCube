@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -148,12 +149,22 @@ public class DockerService
 
     public async Task StartEngine()
     {
+        await RunSystemctl("start", "docker.service", "docker.socket");
 
+        await Connect();
     }
 
-    public void StopEngine()
+    public async Task StopEngine()
     {
+        RefreshTimer.Stop();
+
+        await RunSystemctl("stop", "docker.service", "docker.socket");
+
+        IsConnected = false;
+        OnConnectionStatusChanged?.Invoke(false);
     }
+
+    
 
     public async Task RefreshContainers()
     {
@@ -187,6 +198,42 @@ public class DockerService
         if (CurrentInstance != null)
         {
             await CurrentInstance.LogsContainer(selectedContainer, progress, token);
+        }
+    }
+    
+    private static async Task RunSystemctl(
+        string action,
+        params string[] units)
+    {
+        var arguments = $"{action} {string.Join(" ", units)}";
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "systemctl",
+                Arguments = arguments,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            }
+        };
+
+        process.Start();
+
+        var outputTask = process.StandardOutput.ReadToEndAsync();
+        var errorTask = process.StandardError.ReadToEndAsync();
+
+        await process.WaitForExitAsync();
+
+        var output = await outputTask;
+        var error = await errorTask;
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"systemctl {arguments} failed ({process.ExitCode}): {error}");
         }
     }
 }

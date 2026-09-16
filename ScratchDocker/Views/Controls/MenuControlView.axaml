@@ -122,6 +122,7 @@
                                VerticalAlignment="Center" />
 
                     <!-- More button -->
+
                     <Button Grid.Column="2"
                             Width="28"
                             Height="28"
@@ -129,35 +130,28 @@
                             Background="Transparent"
                             BorderThickness="0"
                             HorizontalContentAlignment="Center"
-                            VerticalContentAlignment="Center">
+                            VerticalContentAlignment="Center"
+                            Click="MoreButton_Click">
 
-                        <Button.Content>
-                            <fluent:FluentIcon Icon="MoreHorizontal"
-                                               Width="16"
-                                               Height="16"
-                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-                        </Button.Content>
+                        <fluent:FluentIcon Icon="MoreHorizontal"
+                                           Width="16"
+                                           Height="16"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
 
-                        <Button.Flyout>
-                            <Flyout Placement="TopEdgeAlignedRight">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Start Engine"
+                                          Command="{Binding StartEngineCommand}" />
 
-                                <StackPanel Spacing="4">
+                                <MenuItem Header="Stop Engine"
+                                          Command="{Binding StopEngineCommand}" />
 
-                                    <Button Content="Start Engine"
-                                            Command="{Binding StartEngineCommand}" />
+                                <Separator />
 
-                                    <Button Content="Stop Engine"
-                                            Command="{Binding StopEngineCommand}" />
-
-                                    <Separator />
-
-                                    <Button Content="Engine Settings"
-                                            Command="{Binding OpenEngineSettingsCommand}" />
-
-                                </StackPanel>
-
-                            </Flyout>
-                        </Button.Flyout>
+                                <MenuItem Header="Engine Settings"
+                                          Command="{Binding OpenEngineSettingsCommand}" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
 
                     </Button>
 
