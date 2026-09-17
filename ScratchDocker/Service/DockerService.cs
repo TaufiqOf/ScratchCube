@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -147,13 +148,26 @@ public class DockerService
         RefreshTimer.Start();
     }
 
-    public async Task StartEngine()
+    public async Task<bool> CheckIsDockerInstalledAsync()
     {
-        await RunSystemctl("start", "docker.service", "docker.socket");
+        // First fast check via PATH
+        if (IsDockerInstalled()) return true;
 
-        await Connect();
+        // Fallback check via systemctl
+        return await IsDockerServiceInstalledAsync();
     }
 
+    public async Task StartEngine()
+    {
+        if (!await CheckIsDockerInstalledAsync())
+        {
+            throw new InvalidOperationException("Docker is not installed on this system.");
+        }
+
+        await RunSystemctl("start", "docker.service", "docker.socket");
+        await Connect();
+    }
+    
     public async Task StopEngine()
     {
         RefreshTimer.Stop();
@@ -235,5 +249,52 @@ public class DockerService
             throw new InvalidOperationException(
                 $"systemctl {arguments} failed ({process.ExitCode}): {error}");
         }
+    }
+    
+    private static async Task<bool> IsDockerServiceInstalledAsync()
+    {
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "systemctl",
+                    Arguments = "status docker.service",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            await process.WaitForExitAsync();
+
+            // Exit code 4 specifically means unit file is missing/not found
+            return process.ExitCode != 4;
+        }
+        catch
+        {
+            // systemctl command itself failed or isn't installed
+            return false;
+        }
+    }
+
+    private static bool IsDockerInstalled()
+    {
+        var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        var paths = pathEnv.Split(Path.PathSeparator);
+
+        foreach (var path in paths)
+        {
+            var fullPath = Path.Combine(path, "docker");
+            if (File.Exists(fullPath))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
