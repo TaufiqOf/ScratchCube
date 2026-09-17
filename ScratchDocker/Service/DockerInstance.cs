@@ -31,7 +31,7 @@ public partial class DockerInstance : ViewModelBase
     public Action<DockerImage> OnImageRemoved { get; set; }
     public Action<DockerVolume> OnVolumeAdded { get; set; }
     public Action<DockerVolume> OnVolumeRemoved { get; set; }
-
+    public string Uri => _uri;
     public string Name
     {
         get => _name;
@@ -378,14 +378,21 @@ public partial class DockerInstance : ViewModelBase
 
     private async void StartStopContainer(DockerContainer container)
     {
-        var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
-        if (inspectResponse.State.Running)
+        try
         {
-            await StopDockerContainer(container);
+            var inspectResponse = await _client.Containers.InspectContainerAsync(container.Id);
+            if (inspectResponse.State.Running)
+            {
+                await StopDockerContainer(container);
+            }
+            else
+            {
+                await StartDockerContainer(container);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await StartDockerContainer(container);
+            Console.WriteLine($"Container state change failed: {ex.Message}");
         }
     }
 

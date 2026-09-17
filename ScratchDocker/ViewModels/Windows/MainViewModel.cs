@@ -65,7 +65,8 @@ public partial class MainViewModel : ViewModelBase
         catch (InvalidOperationException ex)
         {
             var message = 
-                "Docker is not installed on this system. Run the following commands to install it:\n\n" +
+                "Docker is not installed on this system (or current user lacks socket permissions).\n" +
+                "Run the following commands to install Docker and configure permissions:\n\n" +
                 "# 1. Set up Docker's GPG key\n" +
                 "sudo apt-get update\n" +
                 "sudo apt-get install -y ca-certificates curl\n" +
@@ -74,13 +75,16 @@ public partial class MainViewModel : ViewModelBase
                 "sudo chmod a+r /etc/apt/keyrings/docker.asc\n\n" +
                 "# 2. Add Ubuntu-compatible repository (works on Ubuntu & Linux Mint)\n" +
                 "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"${UBUNTU_CODENAME:-noble}\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null\n\n" +
-                "# 3. Install Docker Engine\n" +
+                "# 3. Install Docker Engine and start service\n" +
                 "sudo apt-get update\n" +
-                "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin\n\n" +
-                "# 4. Grant user permissions\n" +
+                "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin\n" +
+                "sudo systemctl enable --now docker\n\n" +
+                "# 4. Grant permissions to current user and Docker socket\n" +
                 "sudo groupadd -f docker\n" +
                 "sudo usermod -aG docker $USER\n" +
-                "newgrp docker";
+                "sudo chown root:docker /var/run/docker.sock\n" +
+                "sudo chmod 660 /var/run/docker.sock\n\n" +
+                "#IMPORTANT: After running these commands, LOG OUT and log back in (or restart) for permissions to take effect desktop-wide.";
 
             await NotificationHelper.ShowMessageBoxAsync("Docker Not Installed", message);
             Console.WriteLine(ex);
