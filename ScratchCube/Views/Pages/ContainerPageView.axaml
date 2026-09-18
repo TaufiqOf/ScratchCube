@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScratchCube.ViewModels.Pages"
+             xmlns:docker="using:ScratchCube.Models.Docker"
+             xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             xmlns:controls="clr-namespace:ScratchCube.Views.Controls"
+             xmlns:dataGrid="clr-namespace:ScratchCube.Views.Controls.DataGrid"
+             x:Class="ScratchCube.Views.Pages.ContainerPageView"
+             x:DataType="vm:ContainerPageViewModel">
+
+  
+
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
+          Margin="28,24,28,0"
+          IsEnabled="{Binding IsConnected}">
+
+
+        <!-- ====================================================== -->
+        <!-- PAGE HEADER                                            -->
+        <!-- ====================================================== -->
+
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Containers"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+
+                <TextBlock Text="View all your running containers and applications."
+                           FontSize="13"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Padding="16,9"
+                    VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <fluent:FluentIcon Icon="Add"
+                                       Width="16"
+                                       Height="16" />
+                    <TextBlock Text="Run"
+                               VerticalAlignment="Center" />
+
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- ====================================================== -->
+        <!-- TOOLBAR                                                -->
+        <!-- ====================================================== -->
+
+        <Grid Grid.Row="1"
+              Margin="0,24,0,16"
+              ColumnDefinitions="*,Auto,Auto">
+
+            <!-- SEARCH -->
+
+            <Border Height="40"
+                    MaxWidth="600"
+                    HorizontalAlignment="Left"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="6">
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <fluent:FluentIcon Grid.Column="0"
+                                       Icon="Search"
+                                       Width="17"
+                                       Height="17"
+                                       Margin="12,0,8,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+
+                    <TextBox Grid.Column="1"
+                             Text="{Binding SearchText}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Watermark="Search containers..."
+                             VerticalContentAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- FILTER -->
+
+            <Button Grid.Column="1"
+                    Width="40"
+                    Height="40"
+                    Margin="10,0,0,0"
+                    Padding="0">
+
+                <fluent:FluentIcon Icon="Filter"
+                                   Width="17"
+                                   Height="17" />
+
+            </Button>
+
+            <!-- REFRESH -->
+            <Button Grid.Column="2"
+                    Width="40"
+                    Height="40"
+                    Margin="6,0,0,0"
+                    Padding="0"
+                    Command="{Binding RefreshCommand}">
+
+                <fluent:FluentIcon Icon="ArrowClockwise"
+                                   Width="17"
+                                   Height="17" />
+            </Button>
+        </Grid>
+        <Grid Grid.Row="2" RowDefinitions="*,Auto,300">
+            <!-- ====================================================== -->
+            <!-- CONTAINER TABLE                                        -->
+            <!-- ====================================================== -->
+            <Border Grid.Row="0"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    ClipToBounds="True">
+                    <dataGrid:ContainerPageDataGridControlView  DataContext="{Binding}" />
+            </Border>
+            <GridSplitter Grid.Row="1"
+                          Height="5"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
+                          ResizeDirection="Rows"
+                          ResizeBehavior="PreviousAndNext"
+                          Background="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                          Cursor="SizeNorthSouth" />
+            <!-- ====================================================== -->
+            <!-- Details                                                -->
+            <!-- ====================================================== -->
+            <TabControl Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+                <TabItem Header="Inspect" FontSize="14">
+                    <controls:ModelViewerControlView
+                        DataContext="{Binding InspectModelViewerControlViewModel}" />
+                </TabItem>
+                <TabItem Header="Stats" FontSize="14">
+                    <controls:ModelViewerControlView
+                        DataContext="{Binding StatsModelViewerControlViewModel}" />
+                </TabItem>
+                <TabItem Header="Logs" FontSize="14">
+                    <TextBox x:Name="LogTextBox"
+                             Text="{Binding SelectedContainerLogs}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalContentAlignment="Top"
+                             FontFamily="Consolas"
+                             FontSize="12" />
+                </TabItem>
+            </TabControl>
+        </Grid>
+        <!-- ====================================================== -->
+        <!-- FOOTER                                                 -->
+        <!-- ====================================================== -->
+
+        <Border Grid.Row="3"
+                Padding="0,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- COUNT -->
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding Containers.Count, StringFormat='{}{0} containers'}"
+                           FontSize="12"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
