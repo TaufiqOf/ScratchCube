@@ -88,7 +88,8 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Images = await _dockerService.GetImages();
+        await DockerService.Instance.RefreshImages();
+        Images =DockerService.Instance.DockerImages;
         ApplySearch();
     }
 }

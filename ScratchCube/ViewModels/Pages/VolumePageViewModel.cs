@@ -21,7 +21,6 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     [ObservableProperty]
     public partial ObservableCollection<DockerVolume> FilteredVolumes { get; private set; } = new();
 
-    private readonly DockerService _dockerService = DockerService.Instance;
     [ObservableProperty] private bool _isConnected;
 
     public VolumePageViewModel()
@@ -57,7 +56,7 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
                 }
                 else
                 {
-                    (await _dockerService.GetVolumes()).ToList().ForEach(Volumes.Add);
+                    (await DockerService.Instance.GetVolumes()).ToList().ForEach(Volumes.Add);
                 }
                 ApplySearch();
             }
@@ -91,7 +90,8 @@ public partial class VolumePageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     public async Task Refresh()
     {
-        Volumes = await _dockerService.GetVolumes();
+        await DockerService.Instance.RefreshVolumes();
+        Volumes = DockerService.Instance.DockerVolumes;
         ApplySearch();
     }
 }

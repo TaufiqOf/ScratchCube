@@ -48,9 +48,9 @@ public class DockerService
     public Action<DockerContainer>? OnContainerAdded { get; set; }
     public Action<DockerContainer>? OnContainerRemoved { get; set; }
 
-    public ObservableCollection<DockerContainer> DockerContainers { get; set; } =
-        new ObservableCollection<DockerContainer>();
-
+    public ObservableCollection<DockerContainer> DockerContainers => CurrentInstance?.DockerContainers ?? new ObservableCollection<DockerContainer>();
+    public ObservableCollection<DockerImage> DockerImages=> CurrentInstance?.DockerImages ?? new ObservableCollection<DockerImage>();
+    public ObservableCollection<DockerVolume> DockerVolumes => CurrentInstance?.DockerVolumes ?? new ObservableCollection<DockerVolume>();
     public Action<DockerImage>? OnImageAdded { get; set; }
     public Action<DockerImage>? OnImageRemoved { get; set; }
     public Action<DockerVolume>? OnVolumeRemoved { get; set; }
@@ -140,9 +140,9 @@ public class DockerService
         RefreshTimer.Stop();
         foreach (var instance in DockerInstances)
         {
-            await instance.RefreshContainers();
-            await instance.RefreshImages();
-            await instance.RefreshVolumes();
+            await RefreshContainers();
+            await RefreshImages();
+            await RefreshVolumes();
         }
 
         RefreshTimer.Start();
@@ -187,7 +187,23 @@ public class DockerService
             await CurrentInstance.RefreshContainers();
         }
     }
+    
+    public async Task RefreshVolumes()
+    {
+        if (CurrentInstance != null)
+        {
+            await CurrentInstance.RefreshVolumes();
+        }
+    }
 
+    public async Task RefreshImages()
+    {
+        if (CurrentInstance != null)
+        {
+            await CurrentInstance.RefreshImages();
+        }
+    }
+            
     public async Task<DockerContainerInspect?> InspectContainer(DockerContainer selectedContainer)
     {
         if (CurrentInstance != null)
@@ -297,4 +313,6 @@ public class DockerService
 
         return false;
     }
+
+
 }
