@@ -1,0 +1,84 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             x:Name="root"
+             Width="500"
+             x:Class="ScratchCube.Views.Controls.DialogControl.RunContainerControl">
+
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+          ColumnDefinitions="Auto, *"
+          RowSpacing="8"
+          ColumnSpacing="8"
+          Margin="16">
+
+        <!-- Image -->
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Image:" />
+
+        <TextBox Grid.Row="0"
+                 Grid.Column="1"
+                 PlaceholderText="Image (e.g. nginx:latest)"
+                 Text="{Binding ImageName, ElementName=root}" />
+
+        <!-- Container Name -->
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Name:" />
+
+        <TextBox Grid.Row="1"
+                 Grid.Column="1"
+                 PlaceholderText="Container name"
+                 Text="{Binding ContainerName, ElementName=root}" />
+
+        <!-- Command -->
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Command:" />
+
+        <TextBox Grid.Row="2"
+                 Grid.Column="1"
+                 PlaceholderText="Optional command"
+                 Text="{Binding Command, ElementName=root}" />
+
+        <!-- Ports -->
+        <TextBlock Grid.Row="3"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Ports:" />
+
+        <TextBox Grid.Row="3"
+                 Grid.Column="1"
+                 PlaceholderText="8080:80, 8443:443"
+                 Text="{Binding Ports, ElementName=root}" />
+
+        <!-- Run -->
+        <Button Grid.Row="4"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                MinWidth="100"
+                Click="RunOnClick"
+                IsEnabled="{Binding !IsRunning, ElementName=root}">
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6">
+
+                <fluent:FluentIcon Icon="Play" />
+
+                <TextBlock Text="Run" />
+
+            </StackPanel>
+        </Button>
+
+        <!-- Status -->
+        <SelectableTextBlock Grid.Row="5"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="2"
+                             Text="{Binding Status, ElementName=root}"
+                             TextWrapping="Wrap" />
+
+    </Grid>
+</UserControl>

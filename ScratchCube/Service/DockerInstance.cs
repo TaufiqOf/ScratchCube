@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using ScratchCube.Helper;
+using ScratchCube.Models;
 using ScratchCube.Models.Docker;
 using ScratchCube.ViewModels;
 
@@ -25,13 +26,14 @@ public partial class DockerInstance : ViewModelBase
     [ObservableProperty] public partial ObservableCollection<DockerVolume> DockerVolumes { get; private set; }
     [ObservableProperty] public partial ObservableCollection<DockerImage> DockerImages { get; private set; }
 
-    public Action<DockerContainer> OnContainerAdded { get; set; }
-    public Action<DockerContainer> OnContainerRemoved { get; set; }
-    public Action<DockerImage> OnImageAdded { get; set; }
-    public Action<DockerImage> OnImageRemoved { get; set; }
-    public Action<DockerVolume> OnVolumeAdded { get; set; }
-    public Action<DockerVolume> OnVolumeRemoved { get; set; }
+    public Action<DockerContainer>? OnContainerAdded { get; set; }
+    public Action<DockerContainer>? OnContainerRemoved { get; set; }
+    public Action<DockerImage>? OnImageAdded { get; set; }
+    public Action<DockerImage>? OnImageRemoved { get; set; }
+    public Action<DockerVolume>? OnVolumeAdded { get; set; }
+    public Action<DockerVolume>? OnVolumeRemoved { get; set; }
     public string Uri => _uri;
+
     public string Name
     {
         get => _name;
@@ -188,8 +190,8 @@ public partial class DockerInstance : ViewModelBase
 
                 if (existingContainer == null)
                 {
-                    OnContainerAdded?.Invoke(dockerContainer);
                     DockerContainers.Add(dockerContainer);
+                    OnContainerAdded?.Invoke(dockerContainer);
                     dockerContainer.OnStartStop += StartStopContainer;
                     dockerContainer.OnDelete += DeleteContainer;
                 }
@@ -235,8 +237,8 @@ public partial class DockerInstance : ViewModelBase
                 var existingImage = DockerImages.FirstOrDefault(q => q.Id == dockerImage.Id);
                 if (existingImage == null)
                 {
-                    OnImageAdded?.Invoke(dockerImage);
                     DockerImages.Add(dockerImage);
+                    OnImageAdded?.Invoke(dockerImage);
                     dockerImage.OnDelete += DeleteImage;
                 }
                 else
@@ -264,6 +266,234 @@ public partial class DockerInstance : ViewModelBase
         {
             Console.WriteLine(e);
         }
+    }
+
+    public async Task<string> RunContainer(
+        string image,
+        string? name = null,
+        string? command = null,
+        string? ports = null)
+    {
+        if (string.IsNullOrWhiteSpace(image))
+        {
+            throw new ArgumentException(
+                "Docker image cannot be empty.",
+                nameof(image));
+        }
+
+        if (_client == null)
+        {
+            throw new InvalidOperationException(
+                "Docker instance is not connected.");
+        }
+
+        var config = new Config
+        {
+            Image = image,
+            Tty = true,
+            OpenStdin = true
+        };
+
+        /*
+         * Command
+         *
+         * Example:
+         *
+         * "nginx -g daemon off;"
+         *
+         * becomes:
+         *
+         * ["nginx", "-g", "daemon", "off;"]
+         */
+        if (!string.IsNullOrWhiteSpace(command))
+        {
+            config.Cmd = command
+                .Split(
+                    ' ',
+                    StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        var hostConfig = new HostConfig();
+
+        /*
+         * Ports
+         *
+         * Example:
+         *
+         * 8080:80
+         * 8080:80,8443:443
+         */
+        if (!string.IsNullOrWhiteSpace(ports))
+        {
+            config.ExposedPorts =
+                new Dictionary<string, EmptyStruct>();
+
+            hostConfig.PortBindings =
+                new Dictionary<string, IList<PortBinding>>();
+
+            foreach (var portMapping in ports.Split(
+                         ',',
+                         StringSplitOptions.RemoveEmptyEntries))
+            {
+                var mapping = portMapping.Trim();
+
+                var parts = mapping.Split(':', 2);
+
+                if (parts.Length != 2)
+                {
+                    throw new ArgumentException(
+                        $"Invalid port mapping '{mapping}'. " +
+                        "Expected format: HOST:CONTAINER");
+                }
+
+                var hostPort = parts[0].Trim();
+                var containerPort = parts[1].Trim();
+
+                if (!int.TryParse(hostPort, out var hostPortNumber) ||
+                    !int.TryParse(containerPort, out var containerPortNumber))
+                {
+                    throw new ArgumentException(
+                        $"Invalid port mapping '{mapping}'. " +
+                        "Ports must be numeric.");
+                }
+
+                if (hostPortNumber is < 1 or > 65535 ||
+                    containerPortNumber is < 1 or > 65535)
+                {
+                    throw new ArgumentException(
+                        $"Invalid port mapping '{mapping}'. " +
+                        "Ports must be between 1 and 65535.");
+                }
+
+                var dockerPort = $"{containerPortNumber}/tcp";
+
+                config.ExposedPorts[dockerPort] = default;
+
+                hostConfig.PortBindings[dockerPort] =
+                    new List<PortBinding>
+                    {
+                        new()
+                        {
+                            HostPort = hostPortNumber.ToString()
+                        }
+                    };
+            }
+        }
+
+        var response = await _client.Containers.CreateContainerAsync(
+            new CreateContainerParameters(config)
+            {
+                Name = name,
+                HostConfig = hostConfig
+            });
+
+        if (string.IsNullOrWhiteSpace(response.ID))
+        {
+            throw new InvalidOperationException(
+                "Docker did not return a container ID.");
+        }
+
+        var started = await _client.Containers.StartContainerAsync(
+            response.ID,
+            new ContainerStartParameters());
+
+        if (!started)
+        {
+            throw new InvalidOperationException(
+                $"Docker created container '{response.ID}' " +
+                "but failed to start it.");
+        }
+
+        return response.ID;
+    }
+
+    public async Task PullImage(
+        string imageName,
+        IProgress<DockerPullProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(imageName))
+        {
+            throw new ArgumentException(
+                "Image name cannot be empty.",
+                nameof(imageName));
+        }
+
+        if (_client == null)
+        {
+            throw new InvalidOperationException(
+                "Docker instance is not connected.");
+        }
+
+        var repository = imageName;
+        var tag = "latest";
+
+        // Split only the tag.
+        // nginx:latest       -> nginx / latest
+        // ubuntu             -> ubuntu / latest
+        // ubuntu:24.04       -> ubuntu / 24.04
+        //
+        // Don't blindly split registry URLs here because
+        // registry.example.com:5000/image contains a port.
+        var lastSlash = imageName.LastIndexOf('/');
+        var lastColon = imageName.LastIndexOf(':');
+
+        if (lastColon > lastSlash)
+        {
+            repository = imageName[..lastColon];
+            tag = imageName[(lastColon + 1)..];
+
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                tag = "latest";
+            }
+        }
+
+        var parameters = new ImagesCreateParameters
+        {
+            FromImage = repository,
+            Tag = tag
+        };
+
+        await _client.Images.CreateImageAsync(
+            parameters,
+            null,
+            new Progress<JSONMessage>(message =>
+            {
+                if (!string.IsNullOrWhiteSpace(message.ErrorMessage))
+                {
+                    progress?.Report(new DockerPullProgress
+                    {
+                        Id = message.ID,
+                        Status = message.Status,
+                        Error = message.ErrorMessage
+                    });
+
+                    return;
+                }
+
+                long? current = message.Progress?.Current;
+                long? total = message.Progress?.Total;
+
+                double? percentage = null;
+
+                if (current.HasValue &&
+                    total.HasValue &&
+                    total.Value > 0)
+                {
+                    percentage = current.Value * 100.0 / total.Value;
+                }
+
+                progress?.Report(new DockerPullProgress
+                {
+                    Id = message.ID,
+                    Status = message.Status,
+                    Current = current,
+                    Total = total,
+                    Percentage = percentage
+                });
+            }),
+            cancellationToken);
     }
 
     public async Task RefreshVolumes()

@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ScratchCube.Helper;
 using ScratchCube.Models;
 using ScratchCube.Models.Docker;
 using ScratchCube.Service;
 using ScratchCube.ViewModels.Controls;
+using ScratchCube.Views.Controls.DialogControl;
 
 namespace ScratchCube.ViewModels.Pages;
 
@@ -134,6 +136,23 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
 
         FilteredContainers = new ObservableCollection<DockerContainer>(
             results);
+    }
+    
+    [RelayCommand]
+    private async Task OnRunContainer()
+    {
+        var control = new RunContainerControl();
+
+        control.OnRunClicked += async (image, name, command, ports) =>
+        {
+            await DockerService.Instance.RunContainer(
+                image,
+                name,
+                command,
+                ports);
+
+        };
+        await NotificationHelper.ShowDialogBoxAsync("Run Container", control);
     }
 
     [RelayCommand]

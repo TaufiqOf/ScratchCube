@@ -110,6 +110,7 @@
 
             <Button Grid.Column="1"
                     Padding="16,9"
+                    Command="{Binding OpenPullDialogCommand}"
                     VerticalAlignment="Center">
 
                 <StackPanel Orientation="Horizontal"

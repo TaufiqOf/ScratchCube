@@ -35,6 +35,7 @@
 
             <Button Grid.Column="1"
                     Padding="16,9"
+                    Command="{Binding RunContainerCommand}"
                     VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal"
                             Spacing="8">

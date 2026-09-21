@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Threading;
+using ScratchCube.Models;
 using ScratchCube.Models.Docker;
 using Timer = System.Timers.Timer;
 
@@ -34,27 +35,42 @@ public class DockerService
             if (_currentInstance != null)
             {
                 _currentInstance.OnConnectionStatusChanged -= CurrentInstanceOnConnectionStatusChanged;
+                _currentInstance.OnContainerAdded -= OnContainerAddedHandler;
+                _currentInstance.OnContainerRemoved -= OnContainerRemovedHandler;
+                _currentInstance.OnImageAdded -= OnImageAddedHandler;
+                _currentInstance.OnImageRemoved -= OnImageRemovedHandler;
+                _currentInstance.OnVolumeAdded -= OnVolumeAddedHandler;
+                _currentInstance.OnVolumeRemoved -= OnVolumeRemovedHandler;
             }
             _currentInstance = value;
             if (_currentInstance != null)
             {
                 _currentInstance.OnConnectionStatusChanged += CurrentInstanceOnConnectionStatusChanged;
+                _currentInstance.OnContainerAdded += OnContainerAddedHandler;
+                _currentInstance.OnContainerRemoved += OnContainerRemovedHandler;
+                _currentInstance.OnImageAdded += OnImageAddedHandler;
+                _currentInstance.OnImageRemoved += OnImageRemovedHandler;
+                _currentInstance.OnVolumeAdded += OnVolumeAddedHandler;
+                _currentInstance.OnVolumeRemoved += OnVolumeRemovedHandler;
             }
         }
     }
+
+   
 
     public bool IsConnected { get; set; }
     public Action<bool>? OnConnectionStatusChanged;
     public Action<DockerContainer>? OnContainerAdded { get; set; }
     public Action<DockerContainer>? OnContainerRemoved { get; set; }
-
-    public ObservableCollection<DockerContainer> DockerContainers => CurrentInstance?.DockerContainers ?? new ObservableCollection<DockerContainer>();
-    public ObservableCollection<DockerImage> DockerImages=> CurrentInstance?.DockerImages ?? new ObservableCollection<DockerImage>();
-    public ObservableCollection<DockerVolume> DockerVolumes => CurrentInstance?.DockerVolumes ?? new ObservableCollection<DockerVolume>();
     public Action<DockerImage>? OnImageAdded { get; set; }
     public Action<DockerImage>? OnImageRemoved { get; set; }
     public Action<DockerVolume>? OnVolumeRemoved { get; set; }
     public Action<DockerVolume>? OnVolumeAdded { get; set; }
+    
+    public ObservableCollection<DockerContainer> DockerContainers => CurrentInstance?.DockerContainers ?? new ObservableCollection<DockerContainer>();
+    public ObservableCollection<DockerImage> DockerImages=> CurrentInstance?.DockerImages ?? new ObservableCollection<DockerImage>();
+    public ObservableCollection<DockerVolume> DockerVolumes => CurrentInstance?.DockerVolumes ?? new ObservableCollection<DockerVolume>();
+
 
     private void CurrentInstanceOnConnectionStatusChanged(bool obj)
     {
@@ -315,4 +331,81 @@ public class DockerService
     }
 
 
+    public async Task PullImage(
+        string imageName,
+        IProgress<DockerPullProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (CurrentInstance == null)
+        {
+            throw new InvalidOperationException("No Docker instance selected.");
+        }
+
+        if (string.IsNullOrWhiteSpace(imageName))
+        {
+            throw new ArgumentException(
+                "Docker image name cannot be empty.",
+                nameof(imageName));
+        }
+
+        await CurrentInstance.PullImage(
+            imageName,
+            progress,
+            cancellationToken);
+        await RefreshImages();
+    }
+    
+    public async Task<string> RunContainer(
+        string image,
+        string? name = null,
+        string? command = null,
+        string? ports = null)
+    {
+        if (CurrentInstance == null)
+        {
+            throw new InvalidOperationException(
+                "No Docker instance selected.");
+        }
+
+        var containerId = await CurrentInstance.RunContainer(
+            image,
+            name,
+            command,
+            ports);
+
+        await RefreshContainers();
+
+        return containerId;
+    }
+    private void OnVolumeAddedHandler(DockerVolume obj)
+    {
+        OnVolumeAdded?.Invoke(obj);
+    }
+
+    private void OnVolumeRemovedHandler(DockerVolume obj)
+    {
+        OnVolumeRemoved?.Invoke(obj);
+    }
+
+    private void OnImageRemovedHandler(DockerImage obj)
+    {
+        OnImageRemoved?.Invoke(obj);
+    }
+
+    private void OnImageAddedHandler(DockerImage obj)
+    {
+        OnImageAdded?.Invoke(obj);
+    }
+
+    private void OnContainerRemovedHandler(DockerContainer obj)
+    {
+        OnContainerRemoved?.Invoke(obj);
+    }
+
+    private void OnContainerAddedHandler(DockerContainer obj)
+    {
+        OnContainerAdded?.Invoke(obj);
+    }
+
+    
 }

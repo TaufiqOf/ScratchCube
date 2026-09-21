@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ScratchCube.Helper;
 using ScratchCube.Models;
 using ScratchCube.Models.Docker;
 using ScratchCube.Service;
@@ -91,5 +92,16 @@ public partial class ImagePageViewModel : ViewModelBase, IPageViewModel
         await DockerService.Instance.RefreshImages();
         Images =DockerService.Instance.DockerImages;
         ApplySearch();
+    }
+    
+    [RelayCommand]
+    public async Task OpenPullDialog()
+    {
+        var dialog = new Views.Controls.DialogControl.DockerPullControl();
+        dialog.OnPullClicked = async imageName =>
+        {
+            await DockerService.Instance.PullImage(imageName,dialog.Progress);
+        };
+        await NotificationHelper.ShowDialogBoxAsync("Pull Docker Image", dialog);
     }
 }

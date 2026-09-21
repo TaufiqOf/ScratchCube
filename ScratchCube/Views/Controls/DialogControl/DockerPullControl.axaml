@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             x:Name="root"
+             Width="500"
+             Height="100"
+             x:Class="ScratchCube.Views.Controls.DialogControl.DockerPullControl">
+
+    <Grid RowDefinitions="Auto, Auto, Auto"
+          ColumnDefinitions="*, Auto"
+          RowSpacing="8"
+          Margin="16">
+
+        <!-- Image -->
+        <TextBox Grid.Row="0"
+                 Grid.Column="0"
+                 PlaceholderText="Image (e.g. nginx:latest)"
+                 Text="{Binding ImageName, ElementName=root}" />
+
+        <!-- Pull button -->
+        <Button Grid.Row="0"
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                Click="PullOnClick"
+                IsEnabled="{Binding !IsPulling, ElementName=root}">
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6">
+
+                <fluent:FluentIcon Icon="ArrowDownload" />
+                <TextBlock Text="Pull" />
+
+            </StackPanel>
+        </Button>
+
+        <!-- Progress -->
+        <ProgressBar Grid.Row="1"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     IsVisible="{Binding IsPulling, ElementName=root}"
+                     Minimum="0"
+                     Maximum="100"
+                     Value="{Binding ProgressValue, ElementName=root}" />
+
+        <!-- Status -->
+        <SelectableTextBlock Grid.Row="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="2"
+                             Text="{Binding Status, ElementName=root}"
+                             TextWrapping="Wrap" />
+
+    </Grid>
+</UserControl>

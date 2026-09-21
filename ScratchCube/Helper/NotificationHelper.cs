@@ -69,14 +69,19 @@ public static class NotificationHelper
             NotificationType.Error,
             TimeSpan.FromSeconds(5));
     }
-    
+
     public static Task ShowMessageBoxAsync(string title, string message)
     {
         var messageDialogControl = new Views.Controls.DialogControl.MessageDialogControl
         {
             Message = message
         };
-        var dialog = new MessageBoxWindow(title, messageDialogControl);
+        return ShowDialogBoxAsync(title, messageDialogControl);
+    }
+
+    public static Task ShowDialogBoxAsync(string title, UserControl control)
+    {
+        var dialog = new MessageBoxWindow(title, control);
         return dialog.ShowDialog(_window);
     }
 }
