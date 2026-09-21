@@ -3,11 +3,11 @@
 set -euo pipefail
 
 # ============================================================
-# ClipboardManagerX - Linux AppImage build script
+# ScratchCube - Linux AppImage build script
 # ============================================================
 
-APP_NAME="ScratchDocker"
-PROJECT_FILE="ScratchDocker.csproj"
+APP_NAME="ScratchCube"
+PROJECT_FILE="ScratchCube.csproj"
 
 RUNTIME="linux-x64"
 CONFIGURATION="Release"
@@ -19,8 +19,8 @@ APPDIR="$OUTPUT_DIR/AppDir"
 
 APPIMAGE="$OUTPUT_DIR/${APP_NAME}-x86_64.AppImage"
 
-ICON_SOURCE="Assets/avalonia-logo.ico"
-ICON_NAME="ScratchDocker"
+ICON_SOURCE="Assets/app-icon.ico"
+ICON_NAME="ScratchCube"
 
 DESKTOP_FILE="$APPDIR/$ICON_NAME.desktop"
 
@@ -177,7 +177,7 @@ DESKTOP_FILE="$APPDIR/$APP_NAME.desktop"
 cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Name=$APP_NAME
-Comment=Clipboard Manager
+Comment=ScratchCube - Docker Manager
 Exec=$APP_NAME
 Icon=$APP_NAME
 Terminal=false

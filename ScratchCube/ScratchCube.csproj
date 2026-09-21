@@ -4,6 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AssemblyVersion>0.0.2</AssemblyVersion>
+        <FileVersion>0.0.2</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,16 +29,23 @@
     <ItemGroup>
       <Compile Update="Views\Windows\MainWindow.axaml.cs">
         <DependentUpon>MainWindow.axaml</DependentUpon>
-        <SubType>Code</SubType>
+          <SubType>Code</SubType>
+          
       </Compile>
       <Compile Update="Views\Pages\ContainerPageView.axaml.cs">
         <DependentUpon>MainPageView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+          
       </Compile>
       <Compile Update="Views\Control\ManuControl.axaml.cs">
         <DependentUpon>MenuControl.axaml</DependentUpon>
+          <SubType>Code</SubType>
+          
       </Compile>
-      <Compile Update="Views\Controls\ManuControlView.axaml.cs">
+      <Compile Update="Views\Controls\MenuControlView.axaml.cs">
         <DependentUpon>MenuControlView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+          
       </Compile>
       <Compile Update="Views\Pages\ImagePageView.axaml.cs">
         <DependentUpon>SettingPageView.axaml</DependentUpon>
@@ -48,9 +57,11 @@
       </Compile>
       <Compile Update="Views\Controls\ModelViewerControlView.axaml.cs">
         <DependentUpon>DockerContainerInspectControlView.axaml</DependentUpon>
+        <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\Controls\DialogControl\MessageDialogControl.axml.cs">
+      <Compile Update="Views\Controls\DialogControl\MessageDialogControl.axaml.cs">
         <DependentUpon>MessageDialogControl.axaml</DependentUpon>
+        <SubType>Code</SubType>
       </Compile>
     </ItemGroup>
 </Project>

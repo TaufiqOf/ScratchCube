@@ -16,11 +16,7 @@
                         Orientation="Horizontal"
                         Margin="16,20,16,20"
                         Spacing="10">
-
-                <fluent:FluentIcon Icon="Box"
-                                   Width="22"
-                                   Height="22"
-                                   Foreground="{DynamicResource SystemControlAccentBrush}" />
+                <Image Source="avares://ScratchCube/Assets/app-icon.ico" Height="48" Width="48"></Image>
 
                 <TextBlock Text="ScratchCube"
                            FontSize="16"
