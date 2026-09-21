@@ -25,6 +25,14 @@ From the **Containers** page, select a container to access:
 - Stats view (live resource usage stream)
 - Logs view (live log stream)
 
+## Screenshots
+
+Screenshots are stored in the `Docs/` folder.
+
+![ScratchCube Screenshot 1](Docs/screen1.1.png)
+![ScratchCube Screenshot 2](Docs/screen2.1.png)
+![ScratchCube Screenshot 3](Docs/screen3.1.png)
+
 ## Tech Stack
 
 - .NET 10 (`net10.0`)
