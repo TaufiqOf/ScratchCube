@@ -29,6 +29,11 @@ public partial class DockerImage : ViewModelBase
             : Id[..Math.Min(12, Id.Length)];
 
     public DateTime CreatedAt => Created;
+    
+    public override string ToString()
+    {
+        return DisplayName;
+    }
 
     public string DisplaySize
     {

@@ -1,13 +1,16 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ScratchCube.Models.Docker;
 
 namespace ScratchCube.Views.Controls.DialogControl;
 
 public partial class RunContainerControl : UserControl
 {
+    private ObservableCollection<DockerImage> _dockerServiceDockerImages;
     public Func<string, string?, string?, string?, Task>? OnRunClicked { get; set; }
 
     public static readonly StyledProperty<string?> ImageNameProperty =
@@ -33,6 +36,11 @@ public partial class RunContainerControl : UserControl
     public static readonly StyledProperty<string?> StatusProperty =
         AvaloniaProperty.Register<RunContainerControl, string?>(
             nameof(Status));
+    
+
+    public static readonly StyledProperty<DockerImage?> SelectedImageProperty =
+        AvaloniaProperty.Register<RunContainerControl, DockerImage?>(
+            nameof(SelectedImage));
 
     public string? ImageName
     {
@@ -70,31 +78,50 @@ public partial class RunContainerControl : UserControl
         set => SetValue(StatusProperty, value);
     }
 
-    public RunContainerControl()
+    public ObservableCollection<DockerImage> DockerServiceDockerImages
     {
+        get => _dockerServiceDockerImages;
+        private set => _dockerServiceDockerImages = value;
+    }
+    
+
+    public DockerImage? SelectedImage
+    {
+        get => GetValue(SelectedImageProperty);
+        set => SetValue(SelectedImageProperty, value);
+    }
+
+
+    public RunContainerControl(ObservableCollection<DockerImage> dockerServiceDockerImages)
+    {
+        DockerServiceDockerImages = dockerServiceDockerImages;
         InitializeComponent();
     }
 
     private async void RunOnClick(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(ImageName))
+        if (SelectedImage == null)
         {
-            Status = "Enter a Docker image name.";
+            Status = "Select a Docker image.";
             return;
         }
 
         IsRunning = true;
-        Status = $"Starting {ImageName}...";
+        Status = $"Starting {SelectedImage.DisplayName}...";
 
         try
         {
-            await RunContainerAsync();
+            await OnRunClicked!.Invoke(
+                SelectedImage.DisplayName,
+                ContainerName,
+                Command,
+                Ports);
 
-            Status = $"Successfully started {ImageName}.";
+            Status = $"Successfully started {SelectedImage.DisplayName}.";
         }
         catch (Exception ex)
         {
-            Status = $"Failed to start {ImageName}: {ex.Message}";
+            Status = $"Failed to start {SelectedImage.DisplayName}: {ex.Message}";
         }
         finally
         {

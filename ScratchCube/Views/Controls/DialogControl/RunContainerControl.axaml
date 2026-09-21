@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             xmlns:docker="clr-namespace:ScratchCube.Models.Docker"
              x:Name="root"
              Width="500"
              x:Class="ScratchCube.Views.Controls.DialogControl.RunContainerControl">
@@ -17,10 +18,18 @@
                    VerticalAlignment="Center"
                    Text="Image:" />
 
-        <TextBox Grid.Row="0"
-                 Grid.Column="1"
-                 PlaceholderText="Image (e.g. nginx:latest)"
-                 Text="{Binding ImageName, ElementName=root}" />
+        <ComboBox Grid.Row="0"
+                  Grid.Column="1"
+                  ItemsSource="{Binding DockerServiceDockerImages, ElementName=root}"
+                  SelectedItem="{Binding SelectedImage, ElementName=root}"
+                  PlaceholderText="Select Docker image" >
+            
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="docker:DockerImage">
+                    <TextBlock Text="{Binding DisplayName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
 
         <!-- Container Name -->
         <TextBlock Grid.Row="1"

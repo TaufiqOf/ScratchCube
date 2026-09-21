@@ -141,7 +141,7 @@ public partial class ContainerPageViewModel : ViewModelBase, IPageViewModel
     [RelayCommand]
     private async Task OnRunContainer()
     {
-        var control = new RunContainerControl();
+        var control = new RunContainerControl(_dockerService.DockerImages);
 
         control.OnRunClicked += async (image, name, command, ports) =>
         {
