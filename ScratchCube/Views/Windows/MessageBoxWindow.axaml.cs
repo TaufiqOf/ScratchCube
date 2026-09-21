@@ -11,10 +11,10 @@ public partial class MessageBoxWindow : Window
         InitializeComponent();
     }
 
-    public MessageBoxWindow(string title, string message) : this()
+    public MessageBoxWindow(string title, UserControl content) : this()
     {
         Title = title;
-        MessageText.Text = message;
+        ContentControl.Content = content;
     }
 
     private void OnOkClicked(object? sender, RoutedEventArgs e)
@@ -22,9 +22,9 @@ public partial class MessageBoxWindow : Window
         Close();
     }
 
-    public static async Task ShowAsync(Window parentWindow, string title, string message)
+    public static async Task ShowAsync(Window parentWindow, string title, UserControl content)
     {
-        var dialog = new MessageBoxWindow(title, message);
+        var dialog = new MessageBoxWindow(title, content);
         await dialog.ShowDialog(parentWindow);
     }
 }

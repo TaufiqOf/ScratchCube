@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ScratchCube.Views.Controls.DialogControl"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+             mc:Ignorable="d"
+             Width="400" Height="200"
+             x:Class="ScratchCube.Views.Controls.DialogControl.MessageDialogControl">
+    <Grid RowDefinitions="Auto, *" Margin="16" ColumnDefinitions="*, Auto">
+
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
+            <SelectableTextBlock TextWrapping="Wrap"
+                                 Text="{Binding Message, RelativeSource={RelativeSource AncestorType=vm:MessageDialogControl}}">
+            </SelectableTextBlock>
+        </ScrollViewer>
+        <Button Grid.Row="0" Grid.Column="1" Click="CopyOnClick">
+            <fluent:FluentIcon Icon="Copy" />
+        </Button>
+    </Grid>
+</UserControl>

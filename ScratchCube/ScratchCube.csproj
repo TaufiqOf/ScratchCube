@@ -49,5 +49,8 @@
       <Compile Update="Views\Controls\ModelViewerControlView.axaml.cs">
         <DependentUpon>DockerContainerInspectControlView.axaml</DependentUpon>
       </Compile>
+      <Compile Update="Views\Controls\DialogControl\MessageDialogControl.axml.cs">
+        <DependentUpon>MessageDialogControl.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>

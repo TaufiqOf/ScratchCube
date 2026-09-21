@@ -72,7 +72,11 @@ public static class NotificationHelper
     
     public static Task ShowMessageBoxAsync(string title, string message)
     {
-        var dialog = new MessageBoxWindow(title, message);
+        var messageDialogControl = new Views.Controls.DialogControl.MessageDialogControl
+        {
+            Message = message
+        };
+        var dialog = new MessageBoxWindow(title, messageDialogControl);
         return dialog.ShowDialog(_window);
     }
 }
