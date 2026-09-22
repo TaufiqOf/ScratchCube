@@ -12,8 +12,9 @@
     <TrayIcon.Icons>
         <TrayIcons>
 
-            <TrayIcon Icon="avares://ScratchCube/Assets/app-icon.ico"
-                      ToolTipText="ScratchCube">
+            <TrayIcon
+                Icon="avares://ScratchCube/Assets/app-icon.ico"
+                ToolTipText="ScratchCube" Clicked="TrayIconOnClicked">
 
                 <TrayIcon.Menu>
                     <NativeMenu>
