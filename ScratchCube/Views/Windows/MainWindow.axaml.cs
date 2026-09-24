@@ -10,4 +10,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         NotificationHelper.Initialize(this);
     }
+
+    public void ForceExit()
+    {
+        Close();
+    }
 }
