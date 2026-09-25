@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
@@ -16,13 +15,14 @@ public static class AutoStartManager
     public static bool IsFlatpak =>
         !string.IsNullOrWhiteSpace(FlatpakId);
 
-    // ------------------------------------------------------------
+    // ============================================================
     // Linux
-    // ------------------------------------------------------------
+    // ============================================================
 
     private static string LinuxAutostartDir =>
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.UserProfile),
             ".config",
             "autostart");
 
@@ -31,13 +31,14 @@ public static class AutoStartManager
             LinuxAutostartDir,
             "scratchcube.desktop");
 
-    // ------------------------------------------------------------
+    // ============================================================
     // macOS
-    // ------------------------------------------------------------
+    // ============================================================
 
     private static string MacLaunchAgentsDir =>
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.UserProfile),
             "Library",
             "LaunchAgents");
 
@@ -46,29 +47,44 @@ public static class AutoStartManager
             MacLaunchAgentsDir,
             "com.scratchcube.autostart.plist");
 
-    // ------------------------------------------------------------
-    // Public API
-    // ------------------------------------------------------------
+    // ============================================================
+    // PUBLIC API
+    // ============================================================
 
     public static bool IsEnabled()
     {
+        // --------------------------------------------------------
+        // Linux
+        // --------------------------------------------------------
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            return File.Exists(LinuxDesktopFilePath);
+            return File.Exists(
+                LinuxDesktopFilePath);
         }
+
+        // --------------------------------------------------------
+        // Windows
+        // --------------------------------------------------------
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            using var key = Registry.CurrentUser.OpenSubKey(
-                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
-                writable: false);
+            using var key =
+                Registry.CurrentUser.OpenSubKey(
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+                    writable: false);
 
             return key?.GetValue(AppName) != null;
         }
 
+        // --------------------------------------------------------
+        // macOS
+        // --------------------------------------------------------
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            return File.Exists(MacPlistFilePath);
+            return File.Exists(
+                MacPlistFilePath);
         }
 
         return false;
@@ -76,11 +92,19 @@ public static class AutoStartManager
 
     public static void SetEnabled(bool enable)
     {
+        // --------------------------------------------------------
+        // Linux
+        // --------------------------------------------------------
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             SetLinuxEnabled(enable);
             return;
         }
+
+        // --------------------------------------------------------
+        // Windows
+        // --------------------------------------------------------
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -88,20 +112,28 @@ public static class AutoStartManager
             return;
         }
 
+        // --------------------------------------------------------
+        // macOS
+        // --------------------------------------------------------
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             SetMacEnabled(enable);
-            return;
         }
     }
 
-    // ------------------------------------------------------------
-    // Linux
-    // ------------------------------------------------------------
+    // ============================================================
+    // LINUX
+    // ============================================================
 
     private static void SetLinuxEnabled(bool enable)
     {
-        var desktopFile = LinuxDesktopFilePath;
+        var desktopFile =
+            LinuxDesktopFilePath;
+
+        // --------------------------------------------------------
+        // Disable
+        // --------------------------------------------------------
 
         if (!enable)
         {
@@ -113,12 +145,18 @@ public static class AutoStartManager
             return;
         }
 
-        if (!TryGetLinuxExecCommand(out var execCommand))
+        // --------------------------------------------------------
+        // Enable
+        // --------------------------------------------------------
+
+        if (!TryGetLinuxExecCommand(
+                out var execCommand))
         {
             return;
         }
 
-        Directory.CreateDirectory(LinuxAutostartDir);
+        Directory.CreateDirectory(
+            LinuxAutostartDir);
 
         var content = $"""
             [Desktop Entry]
@@ -131,12 +169,16 @@ public static class AutoStartManager
             StartupNotify=false
             X-GNOME-Autostart-enabled=true
             X-KDE-autostart-enabled=true
-            """
+            """;
 
-        ;
-
-        File.WriteAllText(desktopFile, content);
+        File.WriteAllText(
+            desktopFile,
+            content);
     }
+
+    // ============================================================
+    // LINUX EXEC COMMAND
+    // ============================================================
 
     private static bool TryGetLinuxExecCommand(
         out string execCommand)
@@ -159,59 +201,96 @@ public static class AutoStartManager
         // --------------------------------------------------------
 
         var appImagePath =
-            Environment.GetEnvironmentVariable("APPIMAGE");
+            Environment.GetEnvironmentVariable(
+                "APPIMAGE");
 
-        if (!string.IsNullOrWhiteSpace(appImagePath) &&
-            File.Exists(appImagePath))
+        if (!string.IsNullOrWhiteSpace(appImagePath))
         {
-            execCommand =
-                $"\"{EscapeDesktopExecArg(appImagePath)}\" --autostart";
+            try
+            {
+                appImagePath =
+                    Path.GetFullPath(appImagePath);
+            }
+            catch
+            {
+                // Ignore invalid path.
+            }
 
-            return true;
+            if (File.Exists(appImagePath))
+            {
+                execCommand =
+                    $"{QuoteDesktopExecArg(appImagePath)} --autostart";
+
+                return true;
+            }
         }
 
         // --------------------------------------------------------
         // Normal executable
         // --------------------------------------------------------
 
-        var exePath = Environment.ProcessPath;
+        var exePath =
+            Environment.ProcessPath;
 
-        if (!string.IsNullOrWhiteSpace(exePath) &&
-            File.Exists(exePath))
+        if (!string.IsNullOrWhiteSpace(exePath))
         {
-            execCommand =
-                $"\"{EscapeDesktopExecArg(exePath)}\" --autostart";
+            try
+            {
+                exePath =
+                    Path.GetFullPath(exePath);
+            }
+            catch
+            {
+                // Ignore invalid path.
+            }
 
-            return true;
+            if (File.Exists(exePath))
+            {
+                execCommand =
+                    $"{QuoteDesktopExecArg(exePath)} --autostart";
+
+                return true;
+            }
         }
 
         execCommand = string.Empty;
+
         return false;
     }
 
-    private static string EscapeDesktopExecArg(string value)
+    // ============================================================
+    // DESKTOP EXEC ESCAPING
+    // ============================================================
+
+    private static string QuoteDesktopExecArg(
+        string value)
     {
-        return value
-            .Replace("\\", "\\\\")
-            .Replace("\"", "\\\"");
+        return "\"" +
+               value
+                   .Replace("\\", "\\\\")
+                   .Replace("\"", "\\\"") +
+               "\"";
     }
 
-    // ------------------------------------------------------------
-    // Windows
-    // ------------------------------------------------------------
+    // ============================================================
+    // WINDOWS
+    // ============================================================
 
-    private static void SetWindowsEnabled(bool enable)
+    private static void SetWindowsEnabled(
+        bool enable)
     {
-        var exePath = Environment.ProcessPath;
+        var exePath =
+            Environment.ProcessPath;
 
         if (string.IsNullOrWhiteSpace(exePath))
         {
             return;
         }
 
-        using var key = Registry.CurrentUser.OpenSubKey(
-            @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
-            writable: true);
+        using var key =
+            Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+                writable: true);
 
         if (key == null)
         {
@@ -232,12 +311,17 @@ public static class AutoStartManager
         }
     }
 
-    // ------------------------------------------------------------
+    // ============================================================
     // macOS
-    // ------------------------------------------------------------
+    // ============================================================
 
-    private static void SetMacEnabled(bool enable)
+    private static void SetMacEnabled(
+        bool enable)
     {
+        // --------------------------------------------------------
+        // Disable
+        // --------------------------------------------------------
+
         if (!enable)
         {
             if (File.Exists(MacPlistFilePath))
@@ -248,14 +332,43 @@ public static class AutoStartManager
             return;
         }
 
-        var exePath = Environment.ProcessPath;
+        // --------------------------------------------------------
+        // Executable
+        // --------------------------------------------------------
+
+        var exePath =
+            Environment.ProcessPath;
 
         if (string.IsNullOrWhiteSpace(exePath))
         {
             return;
         }
 
-        Directory.CreateDirectory(MacLaunchAgentsDir);
+        try
+        {
+            exePath =
+                Path.GetFullPath(exePath);
+        }
+        catch
+        {
+            return;
+        }
+
+        if (!File.Exists(exePath))
+        {
+            return;
+        }
+
+        // --------------------------------------------------------
+        // Create LaunchAgents directory
+        // --------------------------------------------------------
+
+        Directory.CreateDirectory(
+            MacLaunchAgentsDir);
+
+        // --------------------------------------------------------
+        // Create plist
+        // --------------------------------------------------------
 
         var plistContent = $"""
             <?xml version="1.0" encoding="UTF-8"?>
@@ -263,6 +376,7 @@ public static class AutoStartManager
                 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
             <dict>
+
                 <key>Label</key>
                 <string>com.scratchcube.autostart</string>
 
@@ -274,6 +388,7 @@ public static class AutoStartManager
 
                 <key>RunAtLoad</key>
                 <true/>
+
             </dict>
             </plist>
             """;
@@ -283,7 +398,12 @@ public static class AutoStartManager
             plistContent);
     }
 
-    private static string EscapeXml(string value)
+    // ============================================================
+    // XML ESCAPING
+    // ============================================================
+
+    private static string EscapeXml(
+        string value)
     {
         return value
             .Replace("&", "&amp;")
