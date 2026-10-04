@@ -105,6 +105,7 @@
 
                 <TextBlock Text="Browse and manage persistent Docker volumes."
                            FontSize="13"
+                           Width="200"
                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
             </StackPanel>
 

@@ -104,7 +104,8 @@
                            Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
 
                 <TextBlock Text="Browse and manage local Docker images."
-                           FontSize="13"
+                           FontSize="13"                             
+                           Width="200"
                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
             </StackPanel>
 
