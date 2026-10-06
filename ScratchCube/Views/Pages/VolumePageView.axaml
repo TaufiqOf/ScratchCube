@@ -148,6 +148,7 @@
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
 
                     <TextBox Grid.Column="1"
+                             Width="200"
                              Text="{Binding SearchText}"
                              BorderThickness="0"
                              Background="Transparent"
